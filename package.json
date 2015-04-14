@@ -1,0 +1,26 @@
+{
+  "name": "sql-concat",
+  "version": "0.0.0",
+  "description": "It's just fancy string concatenation",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:TehShrike/sql-concat.git"
+  },
+  "keywords": [
+    "sql",
+    "mysql"
+  ],
+  "author": "TehShrike",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/TehShrike/sql-concat/issues"
+  },
+  "homepage": "https://github.com/TehShrike/sql-concat",
+  "devDependencies": {
+    "tape": "^4.0.0"
+  }
+}
