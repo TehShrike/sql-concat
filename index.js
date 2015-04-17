@@ -2,8 +2,19 @@
 
 var startingClauses = {
 	select: [],
+	insert: [],
+	onDuplicate: [],
+	values: [],
+	update: [],
+	set: [],
 	from: [],
-	where: []
+	join: [],
+	where: [],
+	groupBy: [],
+	having: [],
+	orderBy: [],
+	limit: [],
+	delete: []
 }
 
 var clauseKeyToString = {
@@ -23,34 +34,63 @@ var clauseKeyToString = {
 	delete: 'DELETE'
 }
 
+var clauseHandlers = {
+	whateverTheyPutIn: function whateverTheyPutIn(str) {
+		return {
+			str: str
+		}
+	},
+	andColumnParam: function andColumnParam(column, param, joinedBy) {
+		joinedBy = joinedBy || 'AND'
+		return {
+			params: [ param ],
+			str: column + getComparisonAndParameterString(true, param),
+			joinedBy: ' ' + joinedBy + ' '
+		}
+	},
+	joinClauseHandler: function joinClauseHandler(table, on, type) {
+		return {
+			str: (type ? type + ' ' : '') + 'JOIN ' + table + ' ON ' + on,
+			joinedBy: '\n'
+		}
+	}
+}
+
 function q(clauses) {
 	return {
-		select: addToClause(clauses, 'select', whateverTheyPutIn),
-		from: addToClause(clauses, 'from', whateverTheyPutIn),
-		where: addToClause(clauses, 'where', andColumnParam),
+		select: addToClause(clauses, 'select', clauseHandlers.whateverTheyPutIn),
+		from: addToClause(clauses, 'from', clauseHandlers.whateverTheyPutIn),
+		where: addToClause(clauses, 'where', clauseHandlers.andColumnParam),
+		join: addToClause(clauses, 'join', clauseHandlers.joinClauseHandler),
 		build: build.bind(null, clauses)
 	}
 }
 
 function build(clauses) {
-	return ['select', 'from', 'where'].map(function(key) {
+	return ['select', 'insert', 'delete', 'values',
+			'update', 'set', 'from', 'join',
+			'where', 'onDuplicate', 'groupBy', 'having',
+			'orderBy', 'limit'].map(function(key) {
 		return {
 			key: key,
 			ary: clauses[key]
 		}
 	}).filter(function(clause) {
-		return clause.ary.length > 0
+		return clause.ary && clause.ary.length > 0
 	}).map(function(clause) {
 		return reduceClauseArray(clause.ary, clauseKeyToString[clause.key])
 	}).reduce(function(part1, part2) {
-		return joinClauseParts('\n', part1, part2)
+		return combine('\n', part1, part2)
 	})
 }
 
 function reduceClauseArray(clause, clauseQueryString) {
 	var reducedClause = clause.reduce(function(splitClause, clausePart) {
-		splitClause.params = splitClause.params.concat(clausePart.params)
-		var joinedBy = (splitClause.str && clausePart.joinedBy) ? (' ' + clausePart.joinedBy + ' ') : ' '
+		if (clausePart.params) {
+			splitClause.params = splitClause.params.concat(clausePart.params)
+		}
+
+		var joinedBy = (splitClause.str && clausePart.joinedBy) ? clausePart.joinedBy : ' '
 
 		splitClause.str = (splitClause.str + joinedBy + clausePart.str).trim()
 
@@ -66,7 +106,7 @@ function reduceClauseArray(clause, clauseQueryString) {
 	}
 }
 
-function joinClauseParts(joinCharacter, part1, part2) {
+function combine(joinCharacter, part1, part2) {
 	return {
 		params: part1.params.concat(part2.params),
 		str: part1.str + joinCharacter + part2.str
@@ -81,24 +121,14 @@ function addToClause(clauses, key, stringBuilder) {
 	}
 }
 
-function whateverTheyPutIn(str) {
-	return {
-		params: [],
-		str: str
+function getComparisonAndParameterString(equal, param) {
+	if (param === null) {
+		return ' IS ' + (equal ? '' : 'NOT') + ' ?'
+	} else if (Array.isArray(param)) {
+		return (equal ? ' ' : ' NOT ') + 'IN(?)'
+	} else {
+		return (equal ? ' ' : ' !') + '= ?'
 	}
-}
-
-function andColumnParam(column, param, joinedBy) {
-	joinedBy = joinedBy || 'AND'
-	return {
-		params: [ param ],
-		str: column + ' = ' + getParameterString(param),
-		joinedBy: joinedBy
-	}
-}
-
-function getParameterString(param) {
-	return '?'
 }
 
 function copy(o) {
