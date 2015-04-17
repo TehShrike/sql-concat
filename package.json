@@ -1,10 +1,10 @@
 {
   "name": "sql-concat",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "It's just fancy string concatenation",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js && echo 'Testing readme examples...' && node node_modules/jsmd readme.md && echo 'All done!'"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/TehShrike/sql-concat",
   "devDependencies": {
+    "jsmd": "^0.3.0",
     "tape": "^4.0.0"
   }
 }
