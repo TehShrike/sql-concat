@@ -2,6 +2,8 @@
 
 A MySQL query builder.
 
+[![Build Status](https://travis-ci.org/TehShrike/sql-concat.svg)](https://travis-ci.org/TehShrike/sql-concat)
+
 ## Designed to...
 
 - Build queries programmatically
