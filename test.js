@@ -111,3 +111,8 @@ test('subqueries', function(t) {
 
 	t.end()
 })
+
+test('group by', function(t) {
+	t.equal(q.groupBy('a', 'b').from('wat').select('lol').where('butts', 13).build().str, ['SELECT lol', 'FROM wat', 'WHERE butts = ?', 'GROUP BY a, b'].join('\n'))
+	t.end()
+})

@@ -11,6 +11,7 @@ function q(clauses) {
 		orWhere: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' OR ')),
 		having: addToClause(clauses, 'having', clauseHandlers.columnParam.bind(null, ' AND ')),
 		orHaving: addToClause(clauses, 'having', clauseHandlers.columnParam.bind(null, ' OR ')),
+		groupBy: addToClause(clauses, 'groupBy', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
 		build: build.bind(null, clauses),
 		getClauses: copy.bind(null, clauses)
 	}
