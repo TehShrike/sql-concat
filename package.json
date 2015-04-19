@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/TehShrike/sql-concat",
   "devDependencies": {
+    "jsmd": "^0.3.0",
     "tape": "^4.0.0"
   }
 }
