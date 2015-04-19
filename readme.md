@@ -26,7 +26,7 @@ var q = require('./')
 var result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise')
 	.from('table1')
 	.join('table2', 'table1.some_boring_id = table2.id')
-	.join('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column', 'LEFT')
+	.leftJoin('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column')
 	.where('table1.pants', 'fancy')
 	.build()
 
@@ -39,6 +39,67 @@ var expectedQuery = 'SELECT table1.some_boring_id, table2.something_interesting,
 result.str // => expectedQuery
 
 result.params // => [ 'fancy' ]
+
+```
+
+## A cooler example
+
+Showing off the composability/reusability of the query objects, plus some dynamic query building:
+
+```js
+
+var q = require('./')
+
+// A partial query that we can just leave here to reuse later:
+var MOST_RECENT_SALE = q.select('item_sale.item_id, MAX(item_sale.date) AS `date`')
+	.from('item_sale')
+	.groupBy('item_sale.item_id')
+
+function mostRecentSalePricesQuery(taxable, itemType) {
+	var subquery = MOST_RECENT_SALE.where('taxable', taxable)
+
+	var query = q.select('item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price')
+		.from('item')
+		.join(subquery, 'latest_sale', 'latest_sale.item_id = item.item_id')
+
+	// Dynamically add new clauses to the query as needed
+	if (itemType) {
+		query = query.where('item.item_type', itemType)
+	}
+
+	return query.build()
+}
+
+// Build those dynamic queries:
+
+var taxableSpecialQuery = mostRecentSalePricesQuery(true, 'special')
+
+var expectedTaxableSpecialQuery = ['SELECT item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price',
+	'FROM item',
+	'JOIN (',
+	'\tSELECT item_sale.item_id, MAX(item_sale.date) AS `date`',
+	'\tFROM item_sale',
+	'\tWHERE taxable = ?',
+	'\tGROUP BY item_sale.item_id',
+	') AS latest_sale ON latest_sale.item_id = item.item_id',
+	'WHERE item.item_type = ?'].join('\n')
+
+taxableSpecialQuery.str // => expectedTaxableSpecialQuery
+taxableSpecialQuery.params // => [ true, 'special' ]
+
+var nonTaxableQuery = mostRecentSalePricesQuery(false)
+
+var expectedNonTaxableQuery = ['SELECT item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price',
+	'FROM item',
+	'JOIN (',
+	'\tSELECT item_sale.item_id, MAX(item_sale.date) AS `date`',
+	'\tFROM item_sale',
+	'\tWHERE taxable = ?',
+	'\tGROUP BY item_sale.item_id',
+	') AS latest_sale ON latest_sale.item_id = item.item_id'].join('\n')
+
+nonTaxableQuery.str // => expectedNonTaxableQuery
+nonTaxableQuery.params // => [ false ]
 
 ```
 
@@ -60,6 +121,7 @@ Adding a new test for your additions would be appreciated, but don't let that st
 - `q.orWhere(column, value)`
 - `q.having(column, value)`
 - `q.orHaving(column, value)`
+- `q.groupBy(column1, column2, etc)`
 
 All of the column/table fields are just strings that aren't escaped or fiddled with in any way, so you can add aliases or whatnot without worrying that you're going to break some query parser.
 
@@ -68,8 +130,10 @@ Put another way, calling `q.select('column1, column2')` is just as acceptable as
 ## Running the tests
 
 1. clone the repo
-2. run `npm install` in the cloned directory
-3. run `npm test`
+2. navigate to the cloned directory
+3. `npm install`
+4. `npm install -g jsmd`
+5. `npm test`
 
 ## License
 

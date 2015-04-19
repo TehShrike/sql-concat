@@ -4,7 +4,7 @@
   "description": "It's just fancy string concatenation",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js && echo 'Testing readme examples...' && node node_modules/jsmd readme.md && echo 'All done!'"
+    "test": "node test.js && echo 'Testing readme examples...' && jsmd readme.md && echo 'All done!'"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/TehShrike/sql-concat",
   "devDependencies": {
-    "jsmd": "^0.3.0",
     "tape": "^4.0.0"
   }
 }
