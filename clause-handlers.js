@@ -1,3 +1,5 @@
+var constants = require('./constants')
+
 module.exports = {
 	whateverTheyPutIn: function whateverTheyPutIn() {
 		var args = Array.prototype.slice.apply(arguments)
@@ -9,6 +11,20 @@ module.exports = {
 			joinedBy: clausePartsJoinedBy
 		}
 	},
+	tableNameOrSubquery: function(table, alias) {
+		if (isAQuery(table)) {
+			var result = table.build('\n\t')
+
+			return {
+				str: combineWithAlias('(\n\t' + result.str + '\n)', alias),
+				params: result.params
+			}
+		} else {
+			return {
+				str: combineWithAlias(table, alias)
+			}
+		}
+	},
 	columnParam: function columnParam(joinedBy, column, param) {
 		return {
 			params: [ param ],
@@ -16,10 +32,33 @@ module.exports = {
 			joinedBy: joinedBy
 		}
 	},
-	joinClauseHandler: function joinClauseHandler(table, on, type) {
-		return {
-			str: (type ? type + ' ' : '') + 'JOIN ' + table + ' ON ' + on,
-			joinedBy: '\n'
+	joinClauseHandler: function joinClauseHandler(type, table, alias, on) {
+		if (!on) {
+			on = alias
+			alias = undefined
+		}
+
+		function joinString() {
+			return type + 'JOIN '
+		}
+
+		function onString() {
+			return on ? ' ON ' + on : ''
+		}
+
+		if (isAQuery(table)) {
+			var result = table.build('\n\t')
+
+			return {
+				str: joinString() + combineWithAlias('(\n\t' + result.str + '\n)', alias) + onString(),
+				params: result.params,
+				joinedBy: '\n'
+			}
+		} else {
+			return {
+				str: joinString() + combineWithAlias(table, alias) + onString(),
+				joinedBy: '\n'
+			}
 		}
 	}
 }
@@ -32,4 +71,16 @@ function getComparisonAndParameterString(equal, param) {
 	} else {
 		return (equal ? ' ' : ' !') + '= ?'
 	}
+}
+
+function isAQuery(q) {
+	var clauses = q && typeof q.getClauses === 'function' && q.getClauses()
+
+	return clauses && constants.clauseOrder.every(function(clauseName) {
+		return clauses[clauseName]
+	})
+}
+
+function combineWithAlias(str, alias) {
+	return alias ? (str + ' AS ' + alias) : str
 }

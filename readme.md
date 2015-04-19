@@ -15,6 +15,7 @@ A MySQL query builder.
 - Easily compose query parts - the query-builder object is immutable, so you can build up a base query and re-use it over and over again with small modifications (add where clauses or joins conditionally, for example)
 - Builds queries for [node-mysql](https://github.com/felixge/node-mysql) (specifically, by expecting its [rules for query values](https://github.com/felixge/node-mysql#escaping-query-values) instead of MySQL's stored procedure parameters)
 - Not as overblown as [knex](http://knexjs.org/), and allows more freedom in using string literals within query chunks
+- Queries should look good when printed out (newlines between clauses, subqueries indented with tabs)
 
 ## Looks like
 
@@ -52,10 +53,13 @@ Adding a new test for your additions would be appreciated, but don't let that st
 ## API so far
 
 - `q.select(column1, column2, etc)`
-- `q.from(tablename)`
-- `q.join(tablename, on)`
+- `q.from(tablename | subquery, alias)`
+- `q.join(tablename | subquery, [alias], on)`
+- `q.leftJoin(tablename | subquery, [alias], on)`
 - `q.where(column, value)`
 - `q.orWhere(column, value)`
+- `q.having(column, value)`
+- `q.orHaving(column, value)`
 
 All of the column/table fields are just strings that aren't escaped or fiddled with in any way, so you can add aliases or whatnot without worrying that you're going to break some query parser.
 

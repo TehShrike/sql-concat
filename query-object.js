@@ -1,38 +1,24 @@
 var clauseHandlers = require('./clause-handlers')
-
-var clauseKeyToString = {
-	select: 'SELECT',
-	insert: 'INSERT INTO',
-	onDuplicate: 'ON DUPLICATE KEY UPDATE',
-	values: 'VALUES',
-	update: 'UPDATE',
-	set: 'SET',
-	from: 'FROM',
-	join: '',
-	where: 'WHERE',
-	groupBy: 'GROUP BY',
-	having: 'HAVING',
-	orderBy: 'ORDER BY',
-	limit: 'LIMIT',
-	delete: 'DELETE'
-}
+var constants = require('./constants')
 
 function q(clauses) {
 	return {
 		select: addToClause(clauses, 'select', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
-		from: addToClause(clauses, 'from', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
+		from: addToClause(clauses, 'from', clauseHandlers.tableNameOrSubquery.bind(null)),
+		join: addToClause(clauses, 'join', clauseHandlers.joinClauseHandler.bind(null, '')),
+		leftJoin: addToClause(clauses, 'join', clauseHandlers.joinClauseHandler.bind(null, 'LEFT ')),
 		where: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' AND ')),
 		orWhere: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' OR ')),
-		join: addToClause(clauses, 'join', clauseHandlers.joinClauseHandler),
-		build: build.bind(null, clauses)
+		having: addToClause(clauses, 'having', clauseHandlers.columnParam.bind(null, ' AND ')),
+		orHaving: addToClause(clauses, 'having', clauseHandlers.columnParam.bind(null, ' OR ')),
+		build: build.bind(null, clauses),
+		getClauses: copy.bind(null, clauses)
 	}
 }
 
-function build(clauses) {
-	return ['select', 'insert', 'delete', 'values',
-			'update', 'set', 'from', 'join',
-			'where', 'onDuplicate', 'groupBy', 'having',
-			'orderBy', 'limit'].map(function(key) {
+function build(clauses, joinedBy) {
+	joinedBy = typeof joinedBy === 'string' ? joinedBy : '\n'
+	return constants.clauseOrder.map(function(key) {
 		return {
 			key: key,
 			ary: clauses[key]
@@ -40,9 +26,9 @@ function build(clauses) {
 	}).filter(function(clause) {
 		return clause.ary && clause.ary.length > 0
 	}).map(function(clause) {
-		return reduceClauseArray(clause.ary, clauseKeyToString[clause.key])
+		return reduceClauseArray(clause.ary, constants.clauseKeyToString[clause.key])
 	}).reduce(function(part1, part2) {
-		return combine('\n', part1, part2)
+		return combine(joinedBy, part1, part2)
 	})
 }
 
