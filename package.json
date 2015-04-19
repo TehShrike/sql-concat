@@ -1,6 +1,6 @@
 {
   "name": "sql-concat",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "It's just fancy string concatenation",
   "main": "index.js",
   "scripts": {
