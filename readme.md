@@ -45,9 +45,21 @@ result.params // => [ 'fancy' ]
 
 A lot of clauses are unimplemented as of this commit.  I'll be implementing them as I need them.
 
-If you want to start using it now and need to add something, feel free - you should just need to edit the `q` function in [index.js](https://github.com/TehShrike/sql-concat/blob/master/index.js), and probably add a new function to `clauseHandlers`.
+If you want to start using it now and need to add something, feel free - you should just need to edit the `q` function in [query-object.js](https://github.com/TehShrike/sql-concat/blob/master/query-object.js), and maybe add a new function to [clause-handlers.js](https://github.com/TehShrike/sql-concat/blob/master/clause-handlers.js).
 
 Adding a new test for your additions would be appreciated, but don't let that stop you from just opening the file and making some changes!
+
+## API so far
+
+- `q.select(column1, column2, etc)`
+- `q.from(tablename)`
+- `q.join(tablename, on)`
+- `q.where(column, value)`
+- `q.orWhere(column, value)`
+
+All of the column/table fields are just strings that aren't escaped or fiddled with in any way, so you can add aliases or whatnot without worrying that you're going to break some query parser.
+
+Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
 ## Running the tests
 

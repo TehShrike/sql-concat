@@ -19,9 +19,10 @@ var clauseKeyToString = {
 
 function q(clauses) {
 	return {
-		select: addToClause(clauses, 'select', clauseHandlers.whateverTheyPutIn),
-		from: addToClause(clauses, 'from', clauseHandlers.whateverTheyPutIn),
-		where: addToClause(clauses, 'where', clauseHandlers.andColumnParam),
+		select: addToClause(clauses, 'select', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
+		from: addToClause(clauses, 'from', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
+		where: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' AND ')),
+		orWhere: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' OR ')),
 		join: addToClause(clauses, 'join', clauseHandlers.joinClauseHandler),
 		build: build.bind(null, clauses)
 	}

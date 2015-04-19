@@ -1,15 +1,19 @@
 module.exports = {
-	whateverTheyPutIn: function whateverTheyPutIn(str) {
+	whateverTheyPutIn: function whateverTheyPutIn() {
+		var args = Array.prototype.slice.apply(arguments)
+		var clausePartsJoinedBy = args.shift()
+		var partsJoinedBy = args.shift()
+
 		return {
-			str: str
+			str: args.join(partsJoinedBy),
+			joinedBy: clausePartsJoinedBy
 		}
 	},
-	andColumnParam: function andColumnParam(column, param, joinedBy) {
-		joinedBy = joinedBy || 'AND'
+	columnParam: function columnParam(joinedBy, column, param) {
 		return {
 			params: [ param ],
 			str: column + getComparisonAndParameterString(true, param),
-			joinedBy: ' ' + joinedBy + ' '
+			joinedBy: joinedBy
 		}
 	},
 	joinClauseHandler: function joinClauseHandler(table, on, type) {

@@ -44,3 +44,25 @@ test('some joins', function(t) {
 
 	t.end()
 })
+
+test('WHERE a OR b', function(t) {
+	var result = q.select('wat')
+		.from('whatever')
+		.where('a', 1)
+		.orWhere('b', 2)
+		.orWhere('c', [3, 4])
+		.build()
+
+	t.equal(result.str, ['SELECT wat',
+		'FROM whatever',
+		'WHERE a = ? OR b = ? OR c IN(?)'].join('\n'))
+
+	t.deepEqual(result.params, [1, 2, [3, 4]])
+
+	t.end()
+})
+
+test('multiple select values', function(t) {
+	t.equal(q.select('a', 'b', 'c').from('blah').build().str, 'SELECT a, b, c\nFROM blah')
+	t.end()
+})
