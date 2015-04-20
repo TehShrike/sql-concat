@@ -132,8 +132,7 @@ Put another way, calling `q.select('column1, column2')` is just as acceptable as
 1. clone the repo
 2. navigate to the cloned directory
 3. `npm install`
-4. `npm install -g jsmd`
-5. `npm test`
+4. `npm test`
 
 ## License
 
