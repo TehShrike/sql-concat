@@ -116,3 +116,15 @@ test('group by', function(t) {
 	t.equal(q.groupBy('a', 'b').from('wat').select('lol').where('butts', 13).build().str, ['SELECT lol', 'FROM wat', 'WHERE butts = ?', 'GROUP BY a, b'].join('\n'))
 	t.end()
 })
+
+test('where like', function(t) {
+	var result = q.select('lol').from('butt').whereLike('column', 'starts with%').build()
+	t.equal(result.str, ['SELECT lol', 'FROM butt', 'WHERE column LIKE ?'].join('\n'))
+	t.deepEqual(result.params, [ 'starts with%' ])
+
+	var result2 = q.select('lol').from('butt').whereLike('column', 'starts with%').orWhereLike('other_column', '%ends with').build()
+	t.equal(result2.str, ['SELECT lol', 'FROM butt', 'WHERE column LIKE ? OR other_column LIKE ?'].join('\n'))
+	t.deepEqual(result2.params, [ 'starts with%', '%ends with' ])
+
+	t.end()
+})
