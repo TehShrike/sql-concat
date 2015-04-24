@@ -25,10 +25,11 @@ module.exports = {
 			}
 		}
 	},
-	columnParam: function columnParam(joinedBy, column, param) {
+	columnParam: function columnParam(joinedBy, opts, column, param) {
+		opts = opts || {}
 		return {
 			params: [ param ],
-			str: column + getComparisonAndParameterString(true, param),
+			str: column + getComparisonAndParameterString(true, param, opts.like),
 			joinedBy: joinedBy
 		}
 	},
@@ -63,13 +64,15 @@ module.exports = {
 	}
 }
 
-function getComparisonAndParameterString(equal, param) {
+function getComparisonAndParameterString(equal, param, like) {
+	var equalityCheck = like ? 'LIKE' : '='
+	var negation = like ? ' NOT ' : ' !'
 	if (param === null) {
 		return ' IS ' + (equal ? '' : 'NOT') + ' ?'
 	} else if (Array.isArray(param)) {
 		return (equal ? ' ' : ' NOT ') + 'IN(?)'
 	} else {
-		return (equal ? ' ' : ' !') + '= ?'
+		return (equal ? ' ' : negation) + equalityCheck + ' ?'
 	}
 }
 

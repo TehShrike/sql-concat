@@ -119,6 +119,8 @@ Adding a new test for your additions would be appreciated, but don't let that st
 - `q.leftJoin(tablename | subquery, [alias], on)`
 - `q.where(column, value)`
 - `q.orWhere(column, value)`
+- `q.whereLike(column, value)`
+- `q.orWhereLike(column, value)`
 - `q.having(column, value)`
 - `q.orHaving(column, value)`
 - `q.groupBy(column1, column2, etc)`
