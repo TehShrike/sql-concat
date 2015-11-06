@@ -128,3 +128,20 @@ test('where like', function(t) {
 
 	t.end()
 })
+
+test('order by', function(t) {
+	var result = q.select('lol').from('butt').orderBy('column1', 'column2').build()
+	t.equal(result.str, ['SELECT lol', 'FROM butt', 'ORDER BY column1, column2'].join('\n'))
+	t.deepEqual(result.params, [ ])
+
+	t.end()
+})
+
+test('limit', function(t) {
+	var result = q.select('lol').from('butt').limit(10).build()
+	t.equal(result.str, ['SELECT lol', 'FROM butt', 'LIMIT 10'].join('\n'))
+	t.deepEqual(result.params, [ ])
+
+
+	t.end()
+})

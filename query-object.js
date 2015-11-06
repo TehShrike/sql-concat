@@ -14,6 +14,8 @@ function q(clauses) {
 		having: addToClause(clauses, 'having', clauseHandlers.columnParam.bind(null, ' AND ', { like: false })),
 		orHaving: addToClause(clauses, 'having', clauseHandlers.columnParam.bind(null, ' OR ', { like: false })),
 		groupBy: addToClause(clauses, 'groupBy', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
+		orderBy: addToClause(clauses, 'orderBy', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
+		limit: addToClause(clauses, 'limit', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
 		build: build.bind(null, clauses),
 		getClauses: copy.bind(null, clauses)
 	}
