@@ -124,6 +124,8 @@ Adding a new test for your additions would be appreciated, but don't let that st
 - `q.having(column, value)`
 - `q.orHaving(column, value)`
 - `q.groupBy(column1, column2, etc)`
+- `q.orderBy(column1, column2, etc)`
+- `q.limit(offset)`
 
 All of the column/table fields are just strings that aren't escaped or fiddled with in any way, so you can add aliases or whatnot without worrying that you're going to break some query parser.
 
