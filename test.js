@@ -142,6 +142,14 @@ test('limit', function(t) {
 	t.equal(result.str, ['SELECT lol', 'FROM butt', 'LIMIT 10'].join('\n'))
 	t.deepEqual(result.params, [ ])
 
+	t.end()
+})
+
+test('null in a where clause', function(t) {
+	var result = q.select('whatever').from('meh').where('something', null).where('thingy', 'whatevs').build()
+
+	t.equal(result.str, ['SELECT whatever', 'FROM meh', 'WHERE something IS ? AND thingy = ?'].join('\n'))
+	t.deepEqual(result.params, [ null, 'whatevs' ])
 
 	t.end()
 })

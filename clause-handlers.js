@@ -68,7 +68,7 @@ function getComparisonAndParameterString(equal, param, like) {
 	var equalityCheck = like ? 'LIKE' : '='
 	var negation = like ? ' NOT ' : ' !'
 	if (param === null) {
-		return ' IS ' + (equal ? '' : 'NOT') + ' ?'
+		return ' IS' + (equal ? '' : 'NOT') + ' ?'
 	} else if (Array.isArray(param)) {
 		return (equal ? ' ' : ' NOT ') + 'IN(?)'
 	} else {
