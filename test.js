@@ -154,7 +154,7 @@ test('null in a where clause', function(t) {
 	t.end()
 })
 
-test('where in(array)', t => {
+test('where in(array)', function(t) {
 	var result = q.select('whatever').from('meh').where('something', [1, 2, 3]).build()
 
 	t.equal(result.str, ['SELECT whatever', 'FROM meh', 'WHERE something IN(?)'].join('\n'))
