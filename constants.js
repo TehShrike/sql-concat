@@ -12,13 +12,14 @@ var clauseKeyToString = {
 	having: 'HAVING',
 	orderBy: 'ORDER BY',
 	limit: 'LIMIT',
-	delete: 'DELETE'
+	delete: 'DELETE',
+	lock: ''
 }
 
 var clauseOrder = ['select', 'insert', 'delete', 'values',
 	'update', 'set', 'from', 'join',
 	'where', 'onDuplicate', 'groupBy', 'having',
-	'orderBy', 'limit']
+	'orderBy', 'limit', 'lock']
 
 var startingClauses = {
 	select: [],
@@ -34,7 +35,8 @@ var startingClauses = {
 	having: [],
 	orderBy: [],
 	limit: [],
-	delete: []
+	delete: [],
+	lock: []
 }
 
 module.exports = {

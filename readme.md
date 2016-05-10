@@ -103,15 +103,11 @@ nonTaxableQuery.params // => [ false ]
 
 ```
 
-## Work in progress
-
-A lot of clauses are unimplemented as of this commit.  I'll be implementing them as I need them.
-
-If you want to start using it now and need to add something, feel free - you should just need to edit the `q` function in [query-object.js](https://github.com/TehShrike/sql-concat/blob/master/query-object.js), and maybe add a new function to [clause-handlers.js](https://github.com/TehShrike/sql-concat/blob/master/clause-handlers.js).
-
-Adding a new test for your additions would be appreciated, but don't let that stop you from just opening the file and making some changes!
-
 ## API so far
+
+Because [node-mysql](https://github.com/felixge/node-mysql) already makes inserting so easy, this module is focused on `SELECT` queries.  I've implemented new clauses as I've needed them, and it's pretty well fleshed out at the moment.
+
+If you need a clause added that is not implemented yet, feel free to open a pull request.  If you're not sure what the API should look like, open an issue and we can talk it through.
 
 - `q.select(column1, column2, etc)`
 - `q.from(tablename | subquery, alias)`
@@ -126,6 +122,8 @@ Adding a new test for your additions would be appreciated, but don't let that st
 - `q.groupBy(column1, column2, etc)`
 - `q.orderBy(column1, column2, etc)`
 - `q.limit(offset)`
+- `q.forUpdate()`
+- `q.lockInShareMode()`
 
 All of the column/table fields are just strings that aren't escaped or fiddled with in any way, so you can add aliases or whatnot without worrying that you're going to break some query parser.
 

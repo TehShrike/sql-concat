@@ -162,3 +162,21 @@ test('where in(array)', function(t) {
 
 	t.end()
 })
+
+test('lock in shared mode', function(t) {
+	var result = q.select('whatever').from('meh').where('something', 22).lockInShareMode().build()
+
+	t.equal(result.str, ['SELECT whatever', 'FROM meh', 'WHERE something = ?', 'LOCK IN SHARE MODE'].join('\n'))
+	t.deepEqual(result.params, [ 22 ])
+
+	t.end()
+})
+
+test('select for update', function(t) {
+	var result = q.select('whatever').from('meh').where('something', 22).forUpdate().build()
+
+	t.equal(result.str, ['SELECT whatever', 'FROM meh', 'WHERE something = ?', 'FOR UPDATE'].join('\n'))
+	t.deepEqual(result.params, [ 22 ])
+
+	t.end()
+})

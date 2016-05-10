@@ -1,6 +1,11 @@
 var constants = require('./constants')
 
 module.exports = {
+	staticText: function staticText(text) {
+		return {
+			str: text
+		}
+	},
 	whateverTheyPutIn: function whateverTheyPutIn() {
 		var args = Array.prototype.slice.apply(arguments)
 		var clausePartsJoinedBy = args.shift()

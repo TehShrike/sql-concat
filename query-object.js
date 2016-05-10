@@ -16,6 +16,8 @@ function q(clauses) {
 		groupBy: addToClause(clauses, 'groupBy', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
 		orderBy: addToClause(clauses, 'orderBy', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
 		limit: addToClause(clauses, 'limit', clauseHandlers.whateverTheyPutIn.bind(null, ', ', ', ')),
+		forUpdate: addToClause(clauses, 'lock', clauseHandlers.staticText.bind(null, 'FOR UPDATE')),
+		lockInShareMode: addToClause(clauses, 'lock', clauseHandlers.staticText.bind(null, 'LOCK IN SHARE MODE')),
 		build: build.bind(null, clauses),
 		getClauses: copy.bind(null, clauses)
 	}
