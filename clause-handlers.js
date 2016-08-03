@@ -30,11 +30,17 @@ module.exports = {
 			}
 		}
 	},
-	columnParam: function columnParam(joinedBy, opts, column, param) {
+	columnParam: function columnParam(joinedBy, opts, column, comparison, param) {
 		opts = opts || {}
+
+		if (param === undefined) {
+			param = comparison
+			comparison = '='
+		}
+
 		return {
 			params: [ param ],
-			str: column + getComparisonAndParameterString(true, param, opts.like),
+			str: column + getComparisonAndParameterString(true, param, opts.like, comparison),
 			joinedBy: joinedBy
 		}
 	},
@@ -69,8 +75,8 @@ module.exports = {
 	}
 }
 
-function getComparisonAndParameterString(equal, param, like) {
-	var equalityCheck = like ? 'LIKE' : '='
+function getComparisonAndParameterString(equal, param, like, comparison) {
+	var equalityCheck = like ? 'LIKE' : comparison
 	var negation = like ? ' NOT ' : ' !'
 	if (param === null) {
 		return ' IS' + (equal ? '' : 'NOT') + ' ?'

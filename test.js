@@ -180,3 +180,39 @@ test('select for update', function(t) {
 
 	t.end()
 })
+
+test('WHERE gt/lt/gte/lte AND', function(t) {
+	var result = q.select('wat')
+		.from('whatever')
+		.where('a', '>', 1)
+		.where('b', '>=', 2)
+		.where('c', '<', 3)
+		.where('d', '<=', 4)
+		.build()
+
+	t.equal(result.str, ['SELECT wat',
+		'FROM whatever',
+		'WHERE a > ? AND b >= ? AND c < ? AND d <= ?'].join('\n'))
+
+	t.deepEqual(result.params, [1, 2, 3, 4])
+
+	t.end()
+})
+
+test('WHERE gt/lt/gte/lte OR', function(t) {
+	var result = q.select('wat')
+		.from('whatever')
+		.orWhere('a', '>', 1)
+		.orWhere('b', '>=', 2)
+		.orWhere('c', '<', 3)
+		.orWhere('d', '<=', 4)
+		.build()
+
+	t.equal(result.str, ['SELECT wat',
+		'FROM whatever',
+		'WHERE a > ? OR b >= ? OR c < ? OR d <= ?'].join('\n'))
+
+	t.deepEqual(result.params, [1, 2, 3, 4])
+
+	t.end()
+})
