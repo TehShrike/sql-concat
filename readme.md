@@ -116,8 +116,8 @@ If you need a clause added that is not implemented yet, feel free to open a pull
 - `q.leftJoin(tablename | subquery, [alias], on)`
 - `q.where(column, [comparitor], value)`
 - `q.orWhere(column, [comparitor], value)`
-- `q.whereLike(column, [comparitor], value)`
-- `q.orWhereLike(column, [comparitor], value)`
+- `q.whereLike(column, value)`
+- `q.orWhereLike(column, value)`
 - `q.having(column, [comparitor], value)`
 - `q.orHaving(column, [comparitor], value)`
 - `q.groupBy(column1, column2, etc)`
