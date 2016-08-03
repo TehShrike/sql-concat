@@ -28,17 +28,18 @@ var result = q.select('table1.some_boring_id, table2.something_interesting, myst
 	.join('table2', 'table1.some_boring_id = table2.id')
 	.leftJoin('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column')
 	.where('table1.pants', 'fancy')
+	.where('table1.britches', '>', 99)
 	.build()
 
 var expectedQuery = 'SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise\n'
 		+ 'FROM table1\n'
 		+ 'JOIN table2 ON table1.some_boring_id = table2.id\n'
 		+ 'LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column\n'
-		+ 'WHERE table1.pants = ?'
+		+ 'WHERE table1.pants = ? AND table1.britches > ?'
 
 result.str // => expectedQuery
 
-result.params // => [ 'fancy' ]
+result.params // => [ 'fancy', 99 ]
 
 ```
 
@@ -113,12 +114,12 @@ If you need a clause added that is not implemented yet, feel free to open a pull
 - `q.from(tablename | subquery, alias)`
 - `q.join(tablename | subquery, [alias], on)`
 - `q.leftJoin(tablename | subquery, [alias], on)`
-- `q.where(column, value)`
-- `q.orWhere(column, value)`
-- `q.whereLike(column, value)`
-- `q.orWhereLike(column, value)`
-- `q.having(column, value)`
-- `q.orHaving(column, value)`
+- `q.where(column, [comparitor], value)`
+- `q.orWhere(column, [comparitor], value)`
+- `q.whereLike(column, [comparitor], value)`
+- `q.orWhereLike(column, [comparitor], value)`
+- `q.having(column, [comparitor], value)`
+- `q.orHaving(column, [comparitor], value)`
 - `q.groupBy(column1, column2, etc)`
 - `q.orderBy(column1, column2, etc)`
 - `q.limit(offset)`
