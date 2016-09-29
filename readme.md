@@ -130,6 +130,13 @@ All of the column/table fields are just strings that aren't escaped or fiddled w
 
 Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
+## To do:
+
+- [Issue 2](https://github.com/TehShrike/sql-concat/issues/2): calling MySQL functions with dynamic parameters as arguments `WHERE some_column = LPAD(other_column, ?, ?)`
+- [Issue 3](https://github.com/TehShrike/sql-concat/issues/3): nested parenthetical groupings `WHERE some_column = ? AND (other_column = ? OR other_column = ?)`
+
+Chime in if you're interested.
+
 ## Running the tests
 
 1. clone the repo
