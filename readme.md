@@ -4,6 +4,10 @@ A MySQL query builder.
 
 [![Build Status](https://travis-ci.org/TehShrike/sql-concat.svg)](https://travis-ci.org/TehShrike/sql-concat)
 
+```
+const q = require('sql-concat')
+```
+
 ## Designed to...
 
 - Build queries programmatically
@@ -19,11 +23,12 @@ A MySQL query builder.
 
 ## Looks like
 
-```js
-
+<!--js
 var q = require('./')
+-->
 
-var result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise')
+```js
+const result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise')
 	.from('table1')
 	.join('table2', 'table1.some_boring_id = table2.id')
 	.leftJoin('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column')
@@ -31,7 +36,7 @@ var result = q.select('table1.some_boring_id, table2.something_interesting, myst
 	.where('table1.britches', '>', 99)
 	.build()
 
-var expectedQuery = 'SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise\n'
+const expectedQuery = 'SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise\n'
 		+ 'FROM table1\n'
 		+ 'JOIN table2 ON table1.some_boring_id = table2.id\n'
 		+ 'LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column\n'
@@ -49,10 +54,8 @@ Showing off the composability/reusability of the query objects, plus some dynami
 
 ```js
 
-var q = require('./')
-
 // A partial query that we can just leave here to reuse later:
-var MOST_RECENT_SALE = q.select('item_sale.item_id, MAX(item_sale.date) AS `date`')
+const MOST_RECENT_SALE = q.select('item_sale.item_id, MAX(item_sale.date) AS `date`')
 	.from('item_sale')
 	.groupBy('item_sale.item_id')
 
@@ -73,9 +76,9 @@ function mostRecentSalePricesQuery(taxable, itemType) {
 
 // Build those dynamic queries:
 
-var taxableSpecialQuery = mostRecentSalePricesQuery(true, 'special')
+const taxableSpecialQuery = mostRecentSalePricesQuery(true, 'special')
 
-var expectedTaxableSpecialQuery = ['SELECT item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price',
+const expectedTaxableSpecialQuery = ['SELECT item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price',
 	'FROM item',
 	'JOIN (',
 	'\tSELECT item_sale.item_id, MAX(item_sale.date) AS `date`',
@@ -88,9 +91,9 @@ var expectedTaxableSpecialQuery = ['SELECT item.item_id, item.description, item.
 taxableSpecialQuery.str // => expectedTaxableSpecialQuery
 taxableSpecialQuery.params // => [ true, 'special' ]
 
-var nonTaxableQuery = mostRecentSalePricesQuery(false)
+const nonTaxableQuery = mostRecentSalePricesQuery(false)
 
-var expectedNonTaxableQuery = ['SELECT item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price',
+const expectedNonTaxableQuery = ['SELECT item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price',
 	'FROM item',
 	'JOIN (',
 	'\tSELECT item_sale.item_id, MAX(item_sale.date) AS `date`',
