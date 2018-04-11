@@ -118,6 +118,7 @@ If you need a clause added that is not implemented yet, feel free to open a pull
 - `q.join(tablename | subquery, [alias], on)`
 - `q.leftJoin(tablename | subquery, [alias], on)`
 - `q.where(column, [comparitor], value)`
+- `q.whereIn(column, arrayOfValues)`
 - `q.orWhere(column, [comparitor], value)`
 - `q.whereLike(column, value)`
 - `q.orWhereLike(column, value)`
