@@ -131,6 +131,23 @@ If you need a clause added that is not implemented yet, feel free to open a pull
 
 All of the column/table fields are just strings that aren't escaped or fiddled with in any way, so you can add aliases or whatnot without worrying that you're going to break some query parser.
 
+If `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`:
+
+```js
+const whereInResult = q.select('fancy')
+    .from('table')
+    .where('table.pants', [ 'fancy', 'boring' ])
+    .build()
+
+const whereInQuery = 'SELECT fancy\n'
+        + 'FROM table\n'
+        + 'WHERE table.pants IN(?)'
+
+whereInResult.str // => whereInQuery
+
+whereInResult.params // => [ [ 'fancy', 'boring' ] ]
+```
+
 Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
 ## To do:
