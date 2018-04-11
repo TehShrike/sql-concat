@@ -8,6 +8,7 @@ var clauseKeyToString = {
 	from: 'FROM',
 	join: '',
 	where: 'WHERE',
+	whereIn: 'WHERE',
 	groupBy: 'GROUP BY',
 	having: 'HAVING',
 	orderBy: 'ORDER BY',
@@ -18,7 +19,7 @@ var clauseKeyToString = {
 
 var clauseOrder = ['select', 'insert', 'delete', 'values',
 	'update', 'set', 'from', 'join',
-	'where', 'onDuplicate', 'groupBy', 'having',
+	'where', 'whereIn', 'onDuplicate', 'groupBy', 'having',
 	'orderBy', 'limit', 'lock']
 
 var startingClauses = {
@@ -31,6 +32,7 @@ var startingClauses = {
 	from: [],
 	join: [],
 	where: [],
+	whereIn: [],
 	groupBy: [],
 	having: [],
 	orderBy: [],

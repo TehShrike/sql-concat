@@ -8,6 +8,7 @@ function q(clauses) {
 		join: addToClause(clauses, 'join', clauseHandlers.joinClauseHandler.bind(null, '')),
 		leftJoin: addToClause(clauses, 'join', clauseHandlers.joinClauseHandler.bind(null, 'LEFT ')),
 		where: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' AND ', { like: false })),
+		whereIn: addToClause(clauses, 'whereIn', clauseHandlers.columnParam.bind(null, ', ', { like: false })),
 		whereLike: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' AND ', { like: true })),
 		orWhere: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' OR ', { like: false })),
 		orWhereLike: addToClause(clauses, 'where', clauseHandlers.columnParam.bind(null, ' OR ', { like: true })),
