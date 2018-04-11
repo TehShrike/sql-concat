@@ -252,3 +252,12 @@ test('HAVING gt/lt/gte/lte OR', function(t) {
 
 	t.end()
 })
+
+test('where in', function(t) {
+	var result = q.select('whatever').from('meh').whereIn('something', [ 'lol', 'butts' ]).build()
+
+	t.equal(result.str, ['SELECT whatever', 'FROM meh', 'WHERE something IN(?)'].join('\n'))
+	t.deepEqual(result.params, [ [ 'lol', 'butts' ] ])
+
+	t.end()
+})
