@@ -154,6 +154,15 @@ test('null in a where clause', function(t) {
 	t.end()
 })
 
+test('null in a where clause with comparator', function(t) {
+	var result = q.select('whatever').from('meh').where('something', 'IS NOT', null).where('thingy', 'whatevs').build()
+
+	t.equal(result.str, [ 'SELECT whatever', 'FROM meh', 'WHERE something IS NOT ? AND thingy = ?' ].join('\n'))
+	t.deepEqual(result.params, [ null, 'whatevs' ])
+
+	t.end()
+})
+
 test('where in(array)', function(t) {
 	var result = q.select('whatever').from('meh').where('something', [1, 2, 3]).build()
 
