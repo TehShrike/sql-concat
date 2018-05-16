@@ -17,7 +17,7 @@ const q = require('sql-concat')
 ## Other features
 
 - Easily compose query parts - the query-builder object is immutable, so you can build up a base query and re-use it over and over again with small modifications (add where clauses or joins conditionally, for example)
-- Builds queries for [node-mysql](https://github.com/felixge/node-mysql) (specifically, by expecting its [rules for query values](https://github.com/felixge/node-mysql#escaping-query-values) instead of MySQL's stored procedure parameters)
+- Builds queries for [mysqljs/mysql](https://github.com/mysqljs/mysql) (specifically, by expecting its [rules for query values](https://github.com/mysqljs/mysql#escaping-query-values) instead of MySQL's stored procedure parameters)
 - Not as overblown as [knex](http://knexjs.org/), and allows more freedom in using string literals within query chunks
 - Queries should look good when printed out (newlines between clauses, subqueries indented with tabs)
 
