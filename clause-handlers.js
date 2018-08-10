@@ -35,12 +35,12 @@ module.exports = {
 
 		if (param === undefined) {
 			param = comparison
-			comparison = '='
+			comparison = undefined
 		}
 
 		return {
 			params: [ param ],
-			str: column + getComparisonAndParameterString(true, param, opts.like, comparison),
+			str: column + getComparisonAndParameterString(param, opts.like, comparison),
 			joinedBy: joinedBy
 		}
 	},
@@ -75,15 +75,14 @@ module.exports = {
 	}
 }
 
-function getComparisonAndParameterString(equal, param, like, comparison) {
-	var equalityCheck = like ? 'LIKE' : comparison
-	var negation = like ? ' NOT ' : ' !'
+function getComparisonAndParameterString(param, like, comparison) {
 	if (param === null) {
-		return ' IS' + (equal ? '' : 'NOT') + ' ?'
+		return ' ' + (comparison || 'IS') + ' ?'
 	} else if (Array.isArray(param)) {
-		return (equal ? ' ' : ' NOT ') + 'IN(?)'
+		return ' ' + (comparison || 'IN') + '(?)'
 	} else {
-		return (equal ? ' ' : negation) + equalityCheck + ' ?'
+		var equalityCheck = like ? 'LIKE' : (comparison || '=')
+		return ' ' + equalityCheck + ' ?'
 	}
 }
 
