@@ -58,7 +58,7 @@ function reduceClauseArray(clause, clauseQueryString) {
 
 	return {
 		params: reducedClause.params,
-		str: (clauseQueryString + ` ` + reducedClause.str).trim(),
+		str: (`${clauseQueryString} ${reducedClause.str}`).trim(),
 	}
 }
 
