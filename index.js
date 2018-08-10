@@ -1,4 +1,4 @@
-var q = require('./query-object')
-var startingClauses = require('./constants').startingClauses
+const q = require(`./query-object`)
+const { startingClauses } = require(`./constants`)
 
 module.exports = q(startingClauses)

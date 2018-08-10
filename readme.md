@@ -2,11 +2,11 @@
 
 A MySQL query builder.
 
-[![Build Status](https://travis-ci.org/TehShrike/sql-concat.svg)](https://travis-ci.org/TehShrike/sql-concat)
-
 ```
 const q = require('sql-concat')
 ```
+
+The only "breaking" change from 1.x to 2.x is that support for versions of node older than 4 was dropped.
 
 ## Designed to...
 
@@ -60,9 +60,9 @@ const MOST_RECENT_SALE = q.select('item_sale.item_id, MAX(item_sale.date) AS `da
 	.groupBy('item_sale.item_id')
 
 function mostRecentSalePricesQuery(taxable, itemType) {
-	var subquery = MOST_RECENT_SALE.where('taxable', taxable)
+	const subquery = MOST_RECENT_SALE.where('taxable', taxable)
 
-	var query = q.select('item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price')
+	let query = q.select('item.item_id, item.description, item.type, latest_sale.date AS latest_sale_date, latest_sale.price')
 		.from('item')
 		.join(subquery, 'latest_sale', 'latest_sale.item_id = item.item_id')
 
