@@ -6,6 +6,9 @@
   "scripts": {
     "test": "node test.js && echo 'Testing readme examples...' && jsmd readme.md && echo 'All done!'"
   },
+  "engines": {
+    "node": ">=6"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:TehShrike/sql-concat.git"
