@@ -6,7 +6,7 @@ A MySQL query builder.
 const q = require('sql-concat')
 ```
 
-The only "breaking" change from 1.x to 2.x is that support for versions of node older than 4 was dropped.
+The only "breaking" change from 1.x to 2.x is that support for versions of node older than 6 was dropped.
 
 ## Designed to...
 
