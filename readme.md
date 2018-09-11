@@ -153,6 +153,18 @@ whereInResult.params // => [ [ 'fancy', 'boring' ] ]
 
 Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
+### Tagged template strings
+
+sql-concat is also a template tag:
+
+```js
+const rainfall = 3
+const templateTagResult = q`SELECT galoshes FROM puddle WHERE rain > ${ rainfall }`
+
+templateTagResult.str // => `SELECT galoshes FROM puddle WHERE rain > ?`
+templateTagResult.params // => [ 3 ]
+```
+
 ## To do:
 
 - [Issue 2](https://github.com/TehShrike/sql-concat/issues/2): calling MySQL functions with dynamic parameters as arguments `WHERE some_column = LPAD(other_column, ?, ?)`

@@ -261,3 +261,12 @@ test(`HAVING gt/lt/gte/lte OR`, t => {
 
 	t.end()
 })
+
+test(`Tagged template string`, t => {
+	const result = q`SELECT wat FROM a WHERE foo = ${ 4 } AND bar IN(${ [ 1, 2 ] })`
+
+	t.equal(result.str, `SELECT wat FROM a WHERE foo = ? AND bar IN(?)`)
+	t.deepEqual(result.params, [ 4, [ 1, 2 ] ])
+
+	t.end()
+})
