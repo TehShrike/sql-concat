@@ -1,26 +1,5 @@
 const { clauseOrder } = require(`./constants`)
 
-const makeOn = on => on ? ` ON ${ on }` : ``
-
-const joinValues = (values, joinedBy) => {
-	const params = []
-	const strs = []
-
-	values.forEach(value => {
-		if (value && typeof value === `object` && value.params) {
-			params.push(...value.params)
-			strs.push(value.str)
-		} else {
-			strs.push(value)
-		}
-	})
-
-	return {
-		str: strs.join(joinedBy),
-		params,
-	}
-}
-
 module.exports = {
 	staticText(text) {
 		return {
@@ -114,6 +93,28 @@ module.exports = {
 		}
 	},
 }
+
+const makeOn = on => on ? ` ON ${ on }` : ``
+
+const joinValues = (values, joinedBy) => {
+	const params = []
+	const strs = []
+
+	values.forEach(value => {
+		if (value && typeof value === `object` && value.params) {
+			params.push(...value.params)
+			strs.push(value.str)
+		} else {
+			strs.push(value)
+		}
+	})
+
+	return {
+		str: strs.join(joinedBy),
+		params,
+	}
+}
+
 
 const getComparison = (like, comparison) => like ? `LIKE` : (comparison || `=`)
 function getComparisonAndParameterString(value, like, comparison) {
