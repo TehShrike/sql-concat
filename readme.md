@@ -165,6 +165,25 @@ templateTagResult.str // => `SELECT galoshes FROM puddle WHERE rain > ?`
 templateTagResult.params // => [ 3 ]
 ```
 
+You can pass these results into any method as a value.  This allows you to properly parameterize function calls:
+
+```js
+const shoeSize = 9
+const functionCallResult = q.select('rubbers')
+	.from('puddle')
+	.where('rain', '>', 4)
+	.where('size', q`LPAD(${ shoeSize }, 2, '0')`)
+	.build()
+
+const functionCallQuery = `SELECT rubbers\n`
+	+ `FROM puddle\n`
+	+ `WHERE rain > ? AND size = LPAD(?, 2, '0')`
+
+functionCallResult.str // => functionCallQuery
+
+functionCallResult.params // => [ 4, 9 ]
+```
+
 ## To do:
 
 - [Issue 2](https://github.com/TehShrike/sql-concat/issues/2): calling MySQL functions with dynamic parameters as arguments `WHERE some_column = LPAD(other_column, ?, ?)`
