@@ -21,8 +21,8 @@ const q = clauses => ({
 	groupBy: addToClause(clauses, `groupBy`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
 	orderBy: addToClause(clauses, `orderBy`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
 	limit: addToClause(clauses, `limit`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
-	forUpdate: addToClause(clauses, `lock`, (...args) => staticText(`FOR UPDATE`, ...args)),
-	lockInShareMode: addToClause(clauses, `lock`, (...args) => staticText(`LOCK IN SHARE MODE`, ...args)),
+	forUpdate: addToClause(clauses, `lock`, () => staticText(`FOR UPDATE`)),
+	lockInShareMode: addToClause(clauses, `lock`, () => staticText(`LOCK IN SHARE MODE`)),
 	build: joinedBy => build(clauses, joinedBy),
 	getClauses: () => copy(clauses),
 })
@@ -70,9 +70,9 @@ function combine(joinCharacter, part1, part2) {
 }
 
 function addToClause(clauses, key, stringBuilder) {
-	return function() {
+	return (...args) => {
 		const newClauses = copy(clauses)
-		newClauses[key].push(stringBuilder(...arguments))
+		newClauses[key].push(stringBuilder(...args))
 		return q(newClauses)
 	}
 }

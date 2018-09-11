@@ -6,11 +6,7 @@ module.exports = {
 			str: text,
 		}
 	},
-	whateverTheyPutIn: function whateverTheyPutIn() {
-		const args = Array.prototype.slice.apply(arguments)
-		const clausePartsJoinedBy = args.shift()
-		const partsJoinedBy = args.shift()
-
+	whateverTheyPutIn: function whateverTheyPutIn(clausePartsJoinedBy, partsJoinedBy, ...args) {
 		return {
 			str: args.join(partsJoinedBy),
 			joinedBy: clausePartsJoinedBy,
@@ -21,7 +17,7 @@ module.exports = {
 			const result = table.build(`\n\t`)
 
 			return {
-				str: combineWithAlias(`(\n\t${result.str}\n)`, alias),
+				str: combineWithAlias(`(\n\t${ result.str }\n)`, alias),
 				params: result.params,
 			}
 		} else {
@@ -51,18 +47,18 @@ module.exports = {
 		}
 
 		function joinString() {
-			return `${type}JOIN `
+			return `${ type }JOIN `
 		}
 
 		function onString() {
-			return on ? ` ON ${on}` : ``
+			return on ? ` ON ${ on }` : ``
 		}
 
 		if (isAQuery(table)) {
 			const result = table.build(`\n\t`)
 
 			return {
-				str: joinString() + combineWithAlias(`(\n\t${result.str}\n)`, alias) + onString(),
+				str: joinString() + combineWithAlias(`(\n\t${ result.str }\n)`, alias) + onString(),
 				params: result.params,
 				joinedBy: `\n`,
 			}
@@ -77,12 +73,12 @@ module.exports = {
 
 function getComparisonAndParameterString(param, like, comparison) {
 	if (param === null) {
-		return ` ${(comparison || `IS`)} ?`
+		return ` ${ (comparison || `IS`) } ?`
 	} else if (Array.isArray(param)) {
-		return ` ${(comparison || `IN`)}(?)`
+		return ` ${ (comparison || `IN`) }(?)`
 	} else {
 		const equalityCheck = like ? `LIKE` : (comparison || `=`)
-		return ` ${equalityCheck} ?`
+		return ` ${ equalityCheck } ?`
 	}
 }
 
@@ -93,5 +89,5 @@ function isAQuery(q) {
 }
 
 function combineWithAlias(str, alias) {
-	return alias ? (`${str} AS ${alias}`) : str
+	return alias ? (`${ str } AS ${ alias }`) : str
 }
