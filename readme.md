@@ -11,17 +11,20 @@ The only "breaking" change from 1.x to 2.x is that support for versions of node 
 ## Designed to...
 
 - Build queries programmatically
-- Eliminate some query boilerplate and provide a better syntax than a big 'ol concatenated string (at least until I start making use of ES6 template strings)
-- Allow simpler combining of query parts and their associated parameters than one long query string followed by a long array of parameter values
+- Allow simple combining of query parts and their associated parameters (as opposed to writing a long query string followed by a long array of parameter values)
+- Build queries for the [mysqljs/mysql](https://github.com/mysqljs/mysql) library (specifically, by expecting its [rules for query values](https://github.com/mysqljs/mysql#escaping-query-values) instead of MySQL's stored procedure parameters)
 
-## Other features
+## Features
 
-- Easily compose query parts - the query-builder object is immutable, so you can build up a base query and re-use it over and over again with small modifications (add where clauses or joins conditionally, for example)
-- Builds queries for [mysqljs/mysql](https://github.com/mysqljs/mysql) (specifically, by expecting its [rules for query values](https://github.com/mysqljs/mysql#escaping-query-values) instead of MySQL's stored procedure parameters)
+- Easily compose query parts - the query-builder object is immutable, so you can build up a base query and re-use it over and over again with small modifications (for example, with conditional where clauses or joins)
 - Not as overblown as [knex](http://knexjs.org/), and allows more freedom in using string literals within query chunks
 - Queries should look good when printed out (newlines between clauses, subqueries indented with tabs)
 
 ## Looks like
+
+```
+const q = require('sql-concat')
+```
 
 <!--js
 var q = require('./')
@@ -107,9 +110,9 @@ nonTaxableQuery.params // => [ false ]
 
 ```
 
-## API so far
+## API
 
-Because [node-mysql](https://github.com/felixge/node-mysql) already makes inserting so easy, this module is focused on `SELECT` queries.  I've implemented new clauses as I've needed them, and it's pretty well fleshed out at the moment.
+Because the [mysql](https://github.com/mysqljs/mysql) package already makes inserting so easy, this module is focused on `SELECT` queries.  I've implemented new clauses as I've needed them, and it's pretty well fleshed out at the moment.
 
 If you need a clause added that is not implemented yet, feel free to open a pull request.  If you're not sure what the API should look like, open an issue and we can talk it through.
 
