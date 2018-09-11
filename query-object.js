@@ -9,7 +9,7 @@ const constants = require(`./constants`)
 
 const q = clauses => ({
 	select: addToClause(clauses, `select`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
-	from: addToClause(clauses, `from`, tableNameOrSubquery.bind(null)),
+	from: addToClause(clauses, `from`, tableNameOrSubquery),
 	join: addToClause(clauses, `join`, (...args) => joinClauseHandler(``, ...args)),
 	leftJoin: addToClause(clauses, `join`, (...args) => joinClauseHandler(`LEFT `, ...args)),
 	where: addToClause(clauses, `where`, (...args) => columnParam(` AND `, { like: false }, ...args)),
@@ -23,8 +23,8 @@ const q = clauses => ({
 	limit: addToClause(clauses, `limit`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
 	forUpdate: addToClause(clauses, `lock`, (...args) => staticText(`FOR UPDATE`, ...args)),
 	lockInShareMode: addToClause(clauses, `lock`, (...args) => staticText(`LOCK IN SHARE MODE`, ...args)),
-	build: build.bind(null, clauses),
-	getClauses: copy.bind(null, clauses),
+	build: joinedBy => build(clauses, joinedBy),
+	getClauses: () => copy(clauses),
 })
 
 function build(clauses, joinedBy) {
@@ -58,7 +58,7 @@ function reduceClauseArray(clause, clauseQueryString) {
 
 	return {
 		params: reducedClause.params,
-		str: (`${clauseQueryString} ${reducedClause.str}`).trim(),
+		str: (`${ clauseQueryString } ${ reducedClause.str }`).trim(),
 	}
 }
 
