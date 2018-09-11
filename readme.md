@@ -184,12 +184,28 @@ functionCallResult.str // => functionCallQuery
 functionCallResult.params // => [ 4, 9 ]
 ```
 
-## To do:
+## Long-shot feature
 
-- [Issue 2](https://github.com/TehShrike/sql-concat/issues/2): calling MySQL functions with dynamic parameters as arguments `WHERE some_column = LPAD(other_column, ?, ?)`
-- [Issue 3](https://github.com/TehShrike/sql-concat/issues/3): nested parenthetical groupings `WHERE some_column = ? AND (other_column = ? OR other_column = ?)`
+Some syntax for generating nested clauses conditionally would be nice, so you could easily generate something like this dynamically:
 
-Chime in if you're interested.
+```sql
+WHERE important = ? AND (your_column = ? OR your_column = ?)
+```
+
+Maybe something like:
+
+```
+const whereCondition = possibleValues.reduce(
+	(condition, possibleValue) => condition.add('your_column', possibleValue),
+	q.someMagicalOrConditional()
+)
+const query = q.select('everything')
+	.from('table')
+	.where('important', true)
+	.where(whereCondition)
+```
+
+You can discuss this feature in [Issue 3](https://github.com/TehShrike/sql-concat/issues/3) if you're interested.
 
 ## Running the tests
 
