@@ -22,12 +22,12 @@ const joinValues = (values, joinedBy) => {
 }
 
 module.exports = {
-	staticText: function staticText(text) {
+	staticText(text) {
 		return {
 			str: text,
 		}
 	},
-	whateverTheyPutIn: function whateverTheyPutIn(clausePartsJoinedBy, partsJoinedBy, ...args) {
+	whateverTheyPutIn(clausePartsJoinedBy, partsJoinedBy, ...args) {
 		const { str, params } = joinValues(args, partsJoinedBy)
 		return {
 			str,
@@ -49,7 +49,7 @@ module.exports = {
 			}
 		}
 	},
-	columnParam: function columnParam(joinedBy, opts, value1, comparison, value2) {
+	columnParam(joinedBy, opts, value1, comparison, value2) {
 		opts = opts || {}
 
 		if (value2 === undefined) {
@@ -74,7 +74,7 @@ module.exports = {
 			joinedBy,
 		}
 	},
-	joinClauseHandler: function joinClauseHandler(type, table, alias, on) {
+	joinClauseHandler(type, table, alias, on) {
 		if (!on) {
 			on = alias
 			alias = undefined
