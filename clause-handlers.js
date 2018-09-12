@@ -28,27 +28,26 @@ module.exports = {
 			}
 		}
 	},
-	columnParam(joinedBy, opts, value1, comparison, value2) {
+	columnParam(joinedBy, opts, column, comparator, value) {
 		opts = opts || {}
 
-		if (value2 === undefined) {
-			value2 = comparison
-			comparison = undefined
+		if (value === undefined) {
+			value = comparator
+			comparator = undefined
 		}
 
-		const value2Object = (value2 && typeof value2 === `object` && value2.params)
-			? {
-				str: ` ` + getComparison(opts.like, comparison) + ` ` + value2.str,
-				params: value2.params,
-			} : {
-				str: getComparisonAndParameterString(value2, opts.like, comparison),
-				params: [ value2 ],
-			}
+		const valueIsObject = (value && typeof value === `object` && value.params)
 
-		const { str, params } = joinValues([ value1, value2Object ], ``)
+		const params = valueIsObject
+			? value.params
+			: [ value ]
+
+		const comparatorAndValue = valueIsObject
+			? getComparison(opts.like, comparator) + ` ` + value.str
+			: getComparisonAndParameterString(value, opts.like, comparator)
 
 		return {
-			str,
+			str: `${column} ${comparatorAndValue}`,
 			params,
 			joinedBy,
 		}
@@ -119,11 +118,11 @@ const joinValues = (values, joinedBy) => {
 const getComparison = (like, comparison) => like ? `LIKE` : (comparison || `=`)
 function getComparisonAndParameterString(value, like, comparison) {
 	if (value === null) {
-		return ` ${ (comparison || `IS`) } ?`
+		return `${ (comparison || `IS`) } ?`
 	} else if (Array.isArray(value)) {
-		return ` ${ (comparison || `IN`) }(?)`
+		return `${ (comparison || `IN`) }(?)`
 	} else {
-		return ` ${ getComparison(like, comparison) } ?`
+		return `${ getComparison(like, comparison) } ?`
 	}
 }
 
