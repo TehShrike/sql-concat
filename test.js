@@ -317,16 +317,16 @@ test(`Passing str/params into every clause`, t => {
 		`LEFT JOIN table ON FOO(?) = BAR(?)`
 	)
 	assertLegit(
-		q.where('column', q`FOO(${ 1 }, ${ 2 })`),
-		`WHERE column = FOO(?, ?)`
+		q.where(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
+		`WHERE FOO(?) = BAR(?)`
 	)
 	assertLegit(
-		q.whereLike('column', q`FOO(${ 1 }, ${2})`),
-		`WHERE column LIKE FOO(?, ?)`
+		q.whereLike(q`FOO(${ 1 })`, q`BAR(${2})`),
+		`WHERE FOO(?) LIKE BAR(?)`
 	)
 	assertLegit(
-		q.having('column', q`FOO(${ 1 }, ${2})`),
-		`HAVING column = FOO(?, ?)`
+		q.having(q`FOO(${ 1 })`, q`BAR(${2})`),
+		`HAVING FOO(?) = BAR(?)`
 	)
 	assertLegit(
 		q.groupBy(q`FOO(${ 1 })`, q`BAR(${ 2 })`),

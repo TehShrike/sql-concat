@@ -6,8 +6,8 @@ module.exports = {
 			str: text,
 		}
 	},
-	whateverTheyPutIn(clausePartsJoinedBy, partsJoinedBy, ...args) {
-		const { str, params } = joinValues(args, partsJoinedBy)
+	whateverTheyPutIn(clausePartsJoinedBy, partsJoinedBy, ...expressions) {
+		const { str, params } = joinExpressions(expressions, partsJoinedBy)
 		return {
 			str,
 			params,
@@ -28,7 +28,7 @@ module.exports = {
 			}
 		}
 	},
-	columnParam(joinedBy, opts, column, comparator, value) {
+	columnParam(joinedBy, opts, expression, comparator, value) {
 		opts = opts || {}
 
 		if (value === undefined) {
@@ -36,18 +36,22 @@ module.exports = {
 			comparator = undefined
 		}
 
+		const expressionObject = expressionToObject(expression)
+
 		const valueIsObject = (value && typeof value === `object` && value.params)
 
-		const params = valueIsObject
+		const valueParams = valueIsObject
 			? value.params
 			: [ value ]
+
+		const params = [ ...expressionObject.params, ...valueParams ]
 
 		const comparatorAndValue = valueIsObject
 			? getComparison(opts.like, comparator) + ` ` + value.str
 			: getComparisonAndParameterString(value, opts.like, comparator)
 
 		return {
-			str: `${column} ${comparatorAndValue}`,
+			str: `${expressionObject.str} ${comparatorAndValue}`,
 			params,
 			joinedBy,
 		}
@@ -95,17 +99,25 @@ module.exports = {
 
 const makeOn = on => on ? ` ON ${ on }` : ``
 
-const joinValues = (values, joinedBy) => {
+const expressionToObject = expression => {
+	if (expression && typeof expression === `object` && expression.params) {
+		return expression
+	} else {
+		return {
+			str: expression,
+			params: []
+		}
+	}
+}
+
+const joinExpressions = (expressions, joinedBy) => {
 	const params = []
 	const strs = []
 
-	values.forEach(value => {
-		if (value && typeof value === `object` && value.params) {
-			params.push(...value.params)
-			strs.push(value.str)
-		} else {
-			strs.push(value)
-		}
+	expressions.forEach(expression => {
+		const object = expressionToObject(expression)
+		params.push(...object.params)
+		strs.push(object.str)
 	})
 
 	return {

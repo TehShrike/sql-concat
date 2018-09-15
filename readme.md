@@ -120,23 +120,21 @@ If you need a clause added that is not implemented yet, feel free to open a pull
 - `q.from(tablename | subquery, alias)`
 - `q.join(tablename | subquery, [alias], on)`
 - `q.leftJoin(tablename | subquery, [alias], on)`
-- `q.where(column, [comparitor], value)`
-- `q.orWhere(column, [comparitor], value)`
-- `q.whereLike(column, value)`
-- `q.orWhereLike(column, value)`
-- `q.having(column, [comparitor], value)`
-- `q.orHaving(column, [comparitor], value)`
+- `q.where(expression, [comparitor], value)`
+- `q.orWhere(expression, [comparitor], value)`
+- `q.whereLike(expression, value)`
+- `q.orWhereLike(expression, value)`
+- `q.having(expression, [comparitor], value)`
+- `q.orHaving(expression, [comparitor], value)`
 - `q.groupBy(expression1, expression2, etc)`
 - `q.orderBy(expression1, expression2, etc)`
 - `q.limit(offset)`
 - `q.forUpdate()`
 - `q.lockInShareMode()`
 
-All of the column/table fields are just strings that aren't escaped or fiddled with in any way, so you can add aliases or whatnot without worrying that you're going to break some query parser.
+`expression` strings are inserted without being parameterized, but you can also pass in [tagged template strings](https://github.com/TehShrike/sql-concat/tree/tagged-template-support#tagged-template-strings) to do anything special.
 
-All `value`s are automatically parameterized.  `expression` strings are inserted without being parameterized, but you can also pass in [tagged template strings](https://github.com/TehShrike/sql-concat/tree/tagged-template-support#tagged-template-strings).
-
-If `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`:
+All `value`s are automatically parameterized.  If a `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`:
 
 ```js
 const whereInResult = q.select('fancy')
