@@ -31,7 +31,8 @@ var q = require('./')
 -->
 
 ```js
-const result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise')
+const minNumber = 0
+const result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise', q`LEAST(table1.whatever, ${minNumber}) AS whatever`)
 	.from('table1')
 	.join('table2', 'table1.some_boring_id = table2.id')
 	.leftJoin('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column')
@@ -39,7 +40,7 @@ const result = q.select('table1.some_boring_id, table2.something_interesting, my
 	.where('table1.britches', '>', 99)
 	.build()
 
-const expectedQuery = 'SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise\n'
+const expectedQuery = 'SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise, LEAST(table1.whatever, ?) AS whatever\n'
 		+ 'FROM table1\n'
 		+ 'JOIN table2 ON table1.some_boring_id = table2.id\n'
 		+ 'LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column\n'
@@ -47,7 +48,7 @@ const expectedQuery = 'SELECT table1.some_boring_id, table2.something_interestin
 
 result.str // => expectedQuery
 
-result.params // => [ 'fancy', 99 ]
+result.params // => [ 0, 'fancy', 99 ]
 
 ```
 
