@@ -11,24 +11,28 @@ The only "breaking" change from 1.x to 2.x is that support for versions of node 
 ## Designed to...
 
 - Build queries programmatically
-- Eliminate some query boilerplate and provide a better syntax than a big 'ol concatenated string (at least until I start making use of ES6 template strings)
-- Allow simpler combining of query parts and their associated parameters than one long query string followed by a long array of parameter values
+- Allow simple combining of query parts and their associated parameters (as opposed to writing a long query string followed by a long array of parameter values)
+- Build queries for the [mysqljs/mysql](https://github.com/mysqljs/mysql) library (specifically, by expecting its [rules for query values](https://github.com/mysqljs/mysql#escaping-query-values) instead of MySQL's stored procedure parameters)
 
-## Other features
+## Features
 
-- Easily compose query parts - the query-builder object is immutable, so you can build up a base query and re-use it over and over again with small modifications (add where clauses or joins conditionally, for example)
-- Builds queries for [mysqljs/mysql](https://github.com/mysqljs/mysql) (specifically, by expecting its [rules for query values](https://github.com/mysqljs/mysql#escaping-query-values) instead of MySQL's stored procedure parameters)
+- Easily compose query parts - the query-builder object is immutable, so you can build up a base query and re-use it over and over again with small modifications (for example, with conditional where clauses or joins)
 - Not as overblown as [knex](http://knexjs.org/), and allows more freedom in using string literals within query chunks
 - Queries should look good when printed out (newlines between clauses, subqueries indented with tabs)
 
 ## Looks like
+
+```
+const q = require('sql-concat')
+```
 
 <!--js
 var q = require('./')
 -->
 
 ```js
-const result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise')
+const minNumber = 0
+const result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise', q`LEAST(table1.whatever, ${minNumber}) AS whatever`)
 	.from('table1')
 	.join('table2', 'table1.some_boring_id = table2.id')
 	.leftJoin('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column')
@@ -36,7 +40,7 @@ const result = q.select('table1.some_boring_id, table2.something_interesting, my
 	.where('table1.britches', '>', 99)
 	.build()
 
-const expectedQuery = 'SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise\n'
+const expectedQuery = 'SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise, LEAST(table1.whatever, ?) AS whatever\n'
 		+ 'FROM table1\n'
 		+ 'JOIN table2 ON table1.some_boring_id = table2.id\n'
 		+ 'LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column\n'
@@ -44,7 +48,7 @@ const expectedQuery = 'SELECT table1.some_boring_id, table2.something_interestin
 
 result.str // => expectedQuery
 
-result.params // => [ 'fancy', 99 ]
+result.params // => [ 0, 'fancy', 99 ]
 
 ```
 
@@ -107,31 +111,31 @@ nonTaxableQuery.params // => [ false ]
 
 ```
 
-## API so far
+## API
 
-Because [node-mysql](https://github.com/felixge/node-mysql) already makes inserting so easy, this module is focused on `SELECT` queries.  I've implemented new clauses as I've needed them, and it's pretty well fleshed out at the moment.
+Because the [mysql](https://github.com/mysqljs/mysql) package already makes inserting so easy, this module is focused on `SELECT` queries.  I've implemented new clauses as I've needed them, and it's pretty well fleshed out at the moment.
 
 If you need a clause added that is not implemented yet, feel free to open a pull request.  If you're not sure what the API should look like, open an issue and we can talk it through.
 
-- `q.select(column1, column2, etc)`
+- `q.select(expression1, expression2, etc)`
 - `q.from(tablename | subquery, alias)`
 - `q.join(tablename | subquery, [alias], on)`
 - `q.leftJoin(tablename | subquery, [alias], on)`
-- `q.where(column, [comparitor], value)`
-- `q.orWhere(column, [comparitor], value)`
-- `q.whereLike(column, value)`
-- `q.orWhereLike(column, value)`
-- `q.having(column, [comparitor], value)`
-- `q.orHaving(column, [comparitor], value)`
-- `q.groupBy(column1, column2, etc)`
-- `q.orderBy(column1, column2, etc)`
+- `q.where(expression, [comparitor], value)`
+- `q.orWhere(expression, [comparitor], value)`
+- `q.whereLike(expression, value)`
+- `q.orWhereLike(expression, value)`
+- `q.having(expression, [comparitor], value)`
+- `q.orHaving(expression, [comparitor], value)`
+- `q.groupBy(expression1, expression2, etc)`
+- `q.orderBy(expression1, expression2, etc)`
 - `q.limit(offset)`
 - `q.forUpdate()`
 - `q.lockInShareMode()`
 
-All of the column/table fields are just strings that aren't escaped or fiddled with in any way, so you can add aliases or whatnot without worrying that you're going to break some query parser.
+`expression` strings are inserted without being parameterized, but you can also pass in [tagged template strings](https://github.com/TehShrike/sql-concat/tree/tagged-template-support#tagged-template-strings) to do anything special.
 
-If `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`:
+All `value`s are automatically parameterized.  If a `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`:
 
 ```js
 const whereInResult = q.select('fancy')
@@ -150,12 +154,59 @@ whereInResult.params // => [ [ 'fancy', 'boring' ] ]
 
 Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
-## To do:
+### Tagged template strings
 
-- [Issue 2](https://github.com/TehShrike/sql-concat/issues/2): calling MySQL functions with dynamic parameters as arguments `WHERE some_column = LPAD(other_column, ?, ?)`
-- [Issue 3](https://github.com/TehShrike/sql-concat/issues/3): nested parenthetical groupings `WHERE some_column = ? AND (other_column = ? OR other_column = ?)`
+sql-concat is also a template tag:
 
-Chime in if you're interested.
+```js
+const rainfall = 3
+const templateTagResult = q`SELECT galoshes FROM puddle WHERE rain > ${ rainfall }`
+
+templateTagResult.str // => `SELECT galoshes FROM puddle WHERE rain > ?`
+templateTagResult.params // => [ 3 ]
+```
+
+You can pass these results into any method as a value.  This allows you to properly parameterize function calls:
+
+```js
+const shoeSize = 9
+const functionCallResult = q.select('rubbers')
+	.from('puddle')
+	.where('rain', '>', 4)
+	.where('size', q`LPAD(${ shoeSize }, 2, '0')`)
+	.build()
+
+const functionCallQuery = `SELECT rubbers\n`
+	+ `FROM puddle\n`
+	+ `WHERE rain > ? AND size = LPAD(?, 2, '0')`
+
+functionCallResult.str // => functionCallQuery
+
+functionCallResult.params // => [ 4, 9 ]
+```
+
+## Long-shot feature
+
+Some syntax for generating nested clauses conditionally would be nice, so you could easily generate something like this dynamically:
+
+```sql
+WHERE important = ? AND (your_column = ? OR your_column = ?)
+```
+
+Maybe something like:
+
+```
+const whereCondition = possibleValues.reduce(
+	(condition, possibleValue) => condition.add('your_column', possibleValue),
+	q.someMagicalOrConditional()
+)
+const query = q.select('everything')
+	.from('table')
+	.where('important', true)
+	.where(whereCondition)
+```
+
+You can discuss this feature in [Issue 3](https://github.com/TehShrike/sql-concat/issues/3) if you're interested.
 
 ## Running the tests
 

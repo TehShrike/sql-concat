@@ -261,3 +261,81 @@ test(`HAVING gt/lt/gte/lte OR`, t => {
 
 	t.end()
 })
+
+test(`Tagged template string`, t => {
+	const result = q`SELECT wat FROM a WHERE foo = ${ 4 } AND bar IN(${ [ 1, 2 ] })`
+
+	t.equal(result.str, `SELECT wat FROM a WHERE foo = ? AND bar IN(?)`)
+	t.deepEqual(result.params, [ 4, [ 1, 2 ] ])
+
+	t.end()
+})
+
+test(`Passing a str/params object as a value`, t => {
+	const { str, params } = q.select(`howdy`)
+		.from(`meh`)
+		.where(`a`, 1)
+		.where(`tag`, {
+			str: `FANCY(?, ?)`,
+			params: [ `pants`, `butts` ],
+		})
+		.where(`b`, 2)
+		.build()
+
+	t.equal(str, `SELECT howdy\nFROM meh\nWHERE a = ? AND tag = FANCY(?, ?) AND b = ?`)
+	t.deepEqual(params, [ 1, `pants`, `butts`, 2 ])
+
+	t.end()
+})
+
+test(`Integration: passing a tagged template string result as an argument`, t => {
+	const { str, params } = q.where(`tag`, q`FANCY(${ `pants` }, ${ `butts` })`).build()
+
+	t.equal(str, `WHERE tag = FANCY(?, ?)`)
+	t.deepEqual(params, [ `pants`, `butts` ])
+
+	t.end()
+})
+
+test(`Passing str/params into every clause`, t => {
+	const assertLegit = (query, expectedStr) => {
+		const { str, params } = query.build()
+		t.equal(str, expectedStr, expectedStr)
+		t.deepEqual(params, [ 1, 2 ])
+	}
+
+	assertLegit(
+		q.select(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
+		`SELECT FOO(?), BAR(?)`
+	)
+	assertLegit(
+		q.join(`table`, q`FOO(${ 1 }) = BAR(${ 2 })`),
+		`JOIN table ON FOO(?) = BAR(?)`
+	)
+	assertLegit(
+		q.leftJoin(`table`, q`FOO(${ 1 }) = BAR(${ 2 })`),
+		`LEFT JOIN table ON FOO(?) = BAR(?)`
+	)
+	assertLegit(
+		q.where(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
+		`WHERE FOO(?) = BAR(?)`
+	)
+	assertLegit(
+		q.whereLike(q`FOO(${ 1 })`, q`BAR(${2})`),
+		`WHERE FOO(?) LIKE BAR(?)`
+	)
+	assertLegit(
+		q.having(q`FOO(${ 1 })`, q`BAR(${2})`),
+		`HAVING FOO(?) = BAR(?)`
+	)
+	assertLegit(
+		q.groupBy(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
+		`GROUP BY FOO(?), BAR(?)`
+	)
+	assertLegit(
+		q.orderBy(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
+		`ORDER BY FOO(?), BAR(?)`
+	)
+
+	t.end()
+})

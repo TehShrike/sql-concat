@@ -1,18 +1,16 @@
 const { clauseOrder } = require(`./constants`)
 
 module.exports = {
-	staticText: function staticText(text) {
+	staticText(text) {
 		return {
 			str: text,
 		}
 	},
-	whateverTheyPutIn: function whateverTheyPutIn() {
-		const args = Array.prototype.slice.apply(arguments)
-		const clausePartsJoinedBy = args.shift()
-		const partsJoinedBy = args.shift()
-
+	whateverTheyPutIn(clausePartsJoinedBy, partsJoinedBy, ...expressions) {
+		const { str, params } = joinExpressions(expressions, partsJoinedBy)
 		return {
-			str: args.join(partsJoinedBy),
+			str,
+			params,
 			joinedBy: clausePartsJoinedBy,
 		}
 	},
@@ -21,7 +19,7 @@ module.exports = {
 			const result = table.build(`\n\t`)
 
 			return {
-				str: combineWithAlias(`(\n\t${result.str}\n)`, alias),
+				str: combineWithAlias(`(\n\t${ result.str }\n)`, alias),
 				params: result.params,
 			}
 		} else {
@@ -30,59 +28,113 @@ module.exports = {
 			}
 		}
 	},
-	columnParam: function columnParam(joinedBy, opts, column, comparison, param) {
+	columnParam(joinedBy, opts, expression, comparator, value) {
 		opts = opts || {}
 
-		if (param === undefined) {
-			param = comparison
-			comparison = undefined
+		if (value === undefined) {
+			value = comparator
+			comparator = undefined
 		}
 
+		const expressionObject = expressionToObject(expression)
+
+		const valueIsObject = (value && typeof value === `object` && value.params)
+
+		const valueParams = valueIsObject
+			? value.params
+			: [ value ]
+
+		const params = [ ...expressionObject.params, ...valueParams ]
+
+		const comparatorAndValue = valueIsObject
+			? getComparison(opts.like, comparator) + ` ` + value.str
+			: getComparisonAndParameterString(value, opts.like, comparator)
+
 		return {
-			params: [ param ],
-			str: column + getComparisonAndParameterString(param, opts.like, comparison),
+			str: `${expressionObject.str} ${comparatorAndValue}`,
+			params,
 			joinedBy,
 		}
 	},
-	joinClauseHandler: function joinClauseHandler(type, table, alias, on) {
+	joinClauseHandler(type, table, alias, on) {
 		if (!on) {
 			on = alias
 			alias = undefined
 		}
 
 		function joinString() {
-			return `${type}JOIN `
+			return `${ type }JOIN `
 		}
 
-		function onString() {
-			return on ? ` ON ${on}` : ``
+		let onParams = []
+		let onString = ``
+
+		if (on) {
+			if (on.params) {
+				onParams = on.params
+				onString = makeOn(on.str)
+			} else {
+				onString = makeOn(on)
+			}
 		}
+
 
 		if (isAQuery(table)) {
 			const result = table.build(`\n\t`)
 
 			return {
-				str: joinString() + combineWithAlias(`(\n\t${result.str}\n)`, alias) + onString(),
-				params: result.params,
+				str: joinString() + combineWithAlias(`(\n\t${ result.str }\n)`, alias) + onString,
+				params: [ ...result.params, ...onParams ],
 				joinedBy: `\n`,
 			}
 		} else {
 			return {
-				str: joinString() + combineWithAlias(table, alias) + onString(),
+				str: joinString() + combineWithAlias(table, alias) + onString,
+				params: onParams,
 				joinedBy: `\n`,
 			}
 		}
 	},
 }
 
-function getComparisonAndParameterString(param, like, comparison) {
-	if (param === null) {
-		return ` ${(comparison || `IS`)} ?`
-	} else if (Array.isArray(param)) {
-		return ` ${(comparison || `IN`)}(?)`
+const makeOn = on => on ? ` ON ${ on }` : ``
+
+const expressionToObject = expression => {
+	if (expression && typeof expression === `object` && expression.params) {
+		return expression
 	} else {
-		const equalityCheck = like ? `LIKE` : (comparison || `=`)
-		return ` ${equalityCheck} ?`
+		return {
+			str: expression,
+			params: []
+		}
+	}
+}
+
+const joinExpressions = (expressions, joinedBy) => {
+	const params = []
+	const strs = []
+
+	expressions.forEach(expression => {
+		const object = expressionToObject(expression)
+		params.push(...object.params)
+		strs.push(object.str)
+	})
+
+	return {
+		str: strs.join(joinedBy),
+		params,
+	}
+}
+
+
+const getComparison = (like, comparison) => like ? `LIKE` : (comparison || `=`)
+function getComparisonAndParameterString(value, like, comparison) {
+	if (value === null) {
+		return `${ (comparison || `IS`) } ?`
+	} else if (Array.isArray(value)) {
+		return `${ (comparison || `IN`) }(?)`
+	} else {
+		return `${ getComparison(like, comparison) } ?`
 	}
 }
 
@@ -93,5 +145,5 @@ function isAQuery(q) {
 }
 
 function combineWithAlias(str, alias) {
-	return alias ? (`${str} AS ${alias}`) : str
+	return alias ? (`${ str } AS ${ alias }`) : str
 }
