@@ -342,3 +342,21 @@ test(`Passing str/params into every clause`, t => {
 
 	t.end()
 })
+
+test(`sql/values are legit with mulitple clauses`, t => {
+	const result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise', q`LEAST(table1.whatever, ?) AS whatever`)
+		.from('table1')
+		.join('table2', 'table1.some_boring_id = table2.id')
+		.leftJoin('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column')
+		.where('table1.pants', 'fancy')
+		.where('table1.britches', '>', 99)
+		.build()
+
+	t.equal(result.str, [ `SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise, LEAST(table1.whatever, ?) AS whatever`,
+		`FROM table1`,
+		`JOIN table2 ON table1.some_boring_id = table2.id`,
+		`LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column`,
+		`WHERE table1.pants = ? AND table1.britches > ?` ].join(`\n`))
+
+	t.end()
+})
