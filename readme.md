@@ -46,9 +46,9 @@ const expectedQuery = 'SELECT table1.some_boring_id, table2.something_interestin
 		+ 'LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column\n'
 		+ 'WHERE table1.pants = ? AND table1.britches > ?'
 
-result.str // => expectedQuery
+result.sql // => expectedQuery
 
-result.params // => [ 0, 'fancy', 99 ]
+result.values // => [ 0, 'fancy', 99 ]
 
 ```
 
@@ -92,8 +92,8 @@ const expectedTaxableSpecialQuery = ['SELECT item.item_id, item.description, ite
 	') AS latest_sale ON latest_sale.item_id = item.item_id',
 	'WHERE item.item_type = ?'].join('\n')
 
-taxableSpecialQuery.str // => expectedTaxableSpecialQuery
-taxableSpecialQuery.params // => [ true, 'special' ]
+taxableSpecialQuery.sql // => expectedTaxableSpecialQuery
+taxableSpecialQuery.values // => [ true, 'special' ]
 
 const nonTaxableQuery = mostRecentSalePricesQuery(false)
 
@@ -106,8 +106,8 @@ const expectedNonTaxableQuery = ['SELECT item.item_id, item.description, item.ty
 	'\tGROUP BY item_sale.item_id',
 	') AS latest_sale ON latest_sale.item_id = item.item_id'].join('\n')
 
-nonTaxableQuery.str // => expectedNonTaxableQuery
-nonTaxableQuery.params // => [ false ]
+nonTaxableQuery.sql // => expectedNonTaxableQuery
+nonTaxableQuery.values // => [ false ]
 
 ```
 
@@ -147,9 +147,9 @@ const whereInQuery = 'SELECT fancy\n'
         + 'FROM table\n'
         + 'WHERE table.pants IN(?)'
 
-whereInResult.str // => whereInQuery
+whereInResult.sql // => whereInQuery
 
-whereInResult.params // => [ [ 'fancy', 'boring' ] ]
+whereInResult.values // => [ [ 'fancy', 'boring' ] ]
 ```
 
 Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
@@ -162,8 +162,8 @@ sql-concat is also a template tag:
 const rainfall = 3
 const templateTagResult = q`SELECT galoshes FROM puddle WHERE rain > ${ rainfall }`
 
-templateTagResult.str // => `SELECT galoshes FROM puddle WHERE rain > ?`
-templateTagResult.params // => [ 3 ]
+templateTagResult.sql // => `SELECT galoshes FROM puddle WHERE rain > ?`
+templateTagResult.values // => [ 3 ]
 ```
 
 You can pass these results into any method as a value.  This allows you to properly parameterize function calls:
@@ -180,9 +180,9 @@ const functionCallQuery = `SELECT rubbers\n`
 	+ `FROM puddle\n`
 	+ `WHERE rain > ? AND size = LPAD(?, 2, '0')`
 
-functionCallResult.str // => functionCallQuery
+functionCallResult.sql // => functionCallQuery
 
-functionCallResult.params // => [ 4, 9 ]
+functionCallResult.values // => [ 4, 9 ]
 ```
 
 ## Long-shot feature
