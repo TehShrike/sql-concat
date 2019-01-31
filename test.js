@@ -299,9 +299,12 @@ test(`Integration: passing a tagged template string result as an argument`, t =>
 
 test(`Passing str/params into every clause`, t => {
 	const assertLegit = (query, expectedStr) => {
-		const { str, params } = query.build()
+		const { sql, str, params, values } = query.build()
+
 		t.equal(str, expectedStr, expectedStr)
+		t.equal(sql, expectedStr, expectedStr)
 		t.deepEqual(params, [ 1, 2 ])
+		t.deepEqual(values, [ 1, 2 ])
 	}
 
 	assertLegit(

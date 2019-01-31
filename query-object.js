@@ -56,9 +56,13 @@ function reduceClauseArray(clause, clauseQueryString) {
 		str: ``,
 	})
 
+	const str = (`${ clauseQueryString } ${ reducedClause.str }`).trim()
+
 	return {
 		params: reducedClause.params,
-		str: (`${ clauseQueryString } ${ reducedClause.str }`).trim(),
+		str,
+		sql: str,
+		values: reducedClause.params,
 	}
 }
 
