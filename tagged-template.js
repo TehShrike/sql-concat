@@ -1,5 +1,5 @@
-module.exports = (queryParts, ...values) =>
-	queryParts.reduce(
+module.exports = (queryParts, ...values) => {
+	const query = queryParts.reduce(
 		(queryObject, queryPart, i) => {
 			queryObject.str += queryPart
 
@@ -12,3 +12,9 @@ module.exports = (queryParts, ...values) =>
 		},
 		{ str: ``, params: [] }
 	)
+
+	return Object.assign(query, {
+		sql: query.str,
+		values: query.params,
+	})
+}

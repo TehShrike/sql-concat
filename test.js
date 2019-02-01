@@ -27,6 +27,11 @@ test(`select/from/where with params`, t => {
 		`WHERE touching = ? AND hugging = ? AND feeling = ?` ].join(`\n`))
 	t.deepEqual(result.params, [ true, true, false ])
 
+	t.equal(result.sql, [ `SELECT butt`,
+		`FROM pants`,
+		`WHERE touching = ? AND hugging = ? AND feeling = ?` ].join(`\n`))
+	t.deepEqual(result.values, [ true, true, false ])
+
 	t.end()
 })
 
@@ -289,19 +294,24 @@ test(`Passing a str/params object as a value`, t => {
 })
 
 test(`Integration: passing a tagged template string result as an argument`, t => {
-	const { str, params } = q.where(`tag`, q`FANCY(${ `pants` }, ${ `butts` })`).build()
+	const { str, params, sql, values } = q.where(`tag`, q`FANCY(${ `pants` }, ${ `butts` })`).build()
 
 	t.equal(str, `WHERE tag = FANCY(?, ?)`)
+	t.equal(sql, `WHERE tag = FANCY(?, ?)`)
 	t.deepEqual(params, [ `pants`, `butts` ])
+	t.deepEqual(values, [ `pants`, `butts` ])
 
 	t.end()
 })
 
 test(`Passing str/params into every clause`, t => {
 	const assertLegit = (query, expectedStr) => {
-		const { str, params } = query.build()
+		const { sql, str, params, values } = query.build()
+
 		t.equal(str, expectedStr, expectedStr)
+		t.equal(sql, expectedStr, expectedStr)
 		t.deepEqual(params, [ 1, 2 ])
+		t.deepEqual(values, [ 1, 2 ])
 	}
 
 	assertLegit(
@@ -336,6 +346,33 @@ test(`Passing str/params into every clause`, t => {
 		q.orderBy(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
 		`ORDER BY FOO(?), BAR(?)`
 	)
+
+	t.end()
+})
+
+test(`sql/values are legit with mulitple clauses`, t => {
+	const result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise', q`LEAST(table1.whatever, ?) AS whatever`)
+		.from('table1')
+		.join('table2', 'table1.some_boring_id = table2.id')
+		.leftJoin('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column')
+		.where('table1.pants', 'fancy')
+		.where('table1.britches', '>', 99)
+		.build()
+
+	t.equal(result.str, [ `SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise, LEAST(table1.whatever, ?) AS whatever`,
+		`FROM table1`,
+		`JOIN table2 ON table1.some_boring_id = table2.id`,
+		`LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column`,
+		`WHERE table1.pants = ? AND table1.britches > ?` ].join(`\n`))
+
+	t.equal(result.sql, [ `SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise, LEAST(table1.whatever, ?) AS whatever`,
+		`FROM table1`,
+		`JOIN table2 ON table1.some_boring_id = table2.id`,
+		`LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column`,
+		`WHERE table1.pants = ? AND table1.britches > ?` ].join(`\n`))
+
+	t.deepEqual(result.params, [ 'fancy', 99 ])
+	t.deepEqual(result.values, [ 'fancy', 99 ])
 
 	t.end()
 })
