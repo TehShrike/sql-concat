@@ -29,7 +29,8 @@ const q = clauses => ({
 
 function build(clauses, joinedBy) {
 	joinedBy = typeof joinedBy === `string` ? joinedBy : `\n`
-	return constants.clauseOrder.map(
+
+	const built = constants.clauseOrder.map(
 		key => ({
 			key,
 			ary: clauses[key],
@@ -38,6 +39,11 @@ function build(clauses, joinedBy) {
 		.filter(clause => clause.ary && clause.ary.length > 0)
 		.map(clause => reduceClauseArray(clause.ary, constants.clauseKeyToString[clause.key]))
 		.reduce((part1, part2) => combine(joinedBy, part1, part2))
+
+	return Object.assign(built, {
+		sql: built.str,
+		values: built.params,
+	})
 }
 
 function reduceClauseArray(clause, clauseQueryString) {
@@ -56,13 +62,9 @@ function reduceClauseArray(clause, clauseQueryString) {
 		str: ``,
 	})
 
-	const str = (`${ clauseQueryString } ${ reducedClause.str }`).trim()
-
 	return {
 		params: reducedClause.params,
-		str,
-		sql: str,
-		values: reducedClause.params,
+		str: (`${ clauseQueryString } ${ reducedClause.str }`).trim(),
 	}
 }
 
