@@ -376,3 +376,37 @@ test(`sql/values are legit with mulitple clauses`, t => {
 
 	t.end()
 })
+
+test(`custom comparator`, t => {
+	const input = 'whatever'
+
+	const result = q.select('myColumn')
+		.from('table1')
+		.where('MATCH(myColumn)', ' ', q`AGAINST(${ input })`)
+		.build()
+
+	t.equal(result.sql, [ `SELECT myColumn`,
+		`FROM table1`,
+		`WHERE MATCH(myColumn)   AGAINST(?)` ].join(`\n`))
+
+	t.deepEqual(result.values, [ 'whatever' ])
+
+	t.end()
+})
+
+test(`no where value`, t => {
+	const input = 'whatever'
+
+	const result = q.select('myColumn')
+		.from('table1')
+		.where(q`MATCH(myColumn) AGAINST(${ input })`)
+		.build()
+
+	t.equal(result.sql, [ `SELECT myColumn`,
+		`FROM table1`,
+		`WHERE MATCH(myColumn) AGAINST(?)` ].join(`\n`))
+
+	t.deepEqual(result.values, [ 'whatever' ])
+
+	t.end()
+})
