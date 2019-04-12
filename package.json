@@ -26,5 +26,8 @@
   "devDependencies": {
     "jsmd": "1.0.0",
     "tape": "4.9.1"
+  },
+  "dependencies": {
+    "sqlstring": "^2.3.1"
   }
 }

@@ -154,6 +154,19 @@ whereInResult.values // => [ [ 'fancy', 'boring' ] ]
 
 Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
+### To String
+
+```js
+const toStringResult = q.select('fancy')
+    .from('table')
+    .where('table.pants', [ 'fancy', 'boring' ])
+    .toString()
+
+const queryString = 'SELECT fancy\nFROM table\nWHERE table.pants IN(\'fancy\', \'boring\')'
+
+toStringResult // => queryString
+```
+
 ### Tagged template strings
 
 sql-concat is also a template tag:

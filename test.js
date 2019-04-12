@@ -410,3 +410,25 @@ test(`no where value`, t => {
 
 	t.end()
 })
+
+test(`toString`, t => {
+	const result = q.select('myColumn')
+		.from('table1')
+		.where('foo', '!=', 'baz')
+		.toString()
+
+	t.equal(result, 'SELECT myColumn\nFROM table1\nWHERE foo != \'baz\'')
+
+	t.end()
+})
+
+test(`toString custom separator`, t => {
+	const result = q.select('myColumn')
+		.from('table1')
+		.where('foo', '!=', 'baz')
+		.toString(' ')
+
+	t.equal(result, 'SELECT myColumn FROM table1 WHERE foo != \'baz\'')
+
+	t.end()
+})
