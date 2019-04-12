@@ -6,6 +6,7 @@ const {
 	staticText,
 } = require(`./clause-handlers`)
 const constants = require(`./constants`)
+const sqlString = require('sqlstring')
 
 const q = clauses => ({
 	select: addToClause(clauses, `select`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
@@ -25,6 +26,10 @@ const q = clauses => ({
 	lockInShareMode: addToClause(clauses, `lock`, () => staticText(`LOCK IN SHARE MODE`)),
 	build: joinedBy => build(clauses, joinedBy),
 	getClauses: () => copy(clauses),
+	toString: joinedBy => {
+		const { sql, values } = build(clauses, joinedBy)
+		return sqlString.format(sql, values)
+	},
 })
 
 function build(clauses, joinedBy) {
