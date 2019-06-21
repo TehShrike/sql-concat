@@ -51,7 +51,7 @@ module.exports = {
 			: getComparisonAndParameterString(value, opts.like, comparator)
 
 		return {
-			str: `${expressionObject.str} ${comparatorAndValue}`,
+			str: `${ expressionObject.str } ${ comparatorAndValue }`,
 			params,
 			joinedBy,
 		}
@@ -105,7 +105,7 @@ const expressionToObject = expression => {
 	} else {
 		return {
 			str: expression,
-			params: []
+			params: [],
 		}
 	}
 }
