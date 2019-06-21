@@ -31,12 +31,17 @@ module.exports = {
 	columnParam(joinedBy, opts, expression, comparator, value) {
 		opts = opts || {}
 
-		if (value === undefined) {
+		const expressionObject = expressionToObject(expression)
+
+		if (comparator === undefined) {
+			if (opts.like) {
+				throw new Error(`You can't use a "like" comparison without passing in a value`)
+			}
+			return Object.assign({ joinedBy }, expressionObject)
+		} else if (value === undefined) {
 			value = comparator
 			comparator = undefined
 		}
-
-		const expressionObject = expressionToObject(expression)
 
 		const valueIsObject = (value && typeof value === `object` && value.params)
 
