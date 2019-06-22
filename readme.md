@@ -117,6 +117,10 @@ Because the [mysql](https://github.com/mysqljs/mysql) package already makes inse
 
 If you need a clause added that is not implemented yet, feel free to open a pull request.  If you're not sure what the API should look like, open an issue and we can talk it through.
 
+### Clauses
+
+Every clause method returns a new immutable `q` query object.
+
 - `q.select(expression1, expression2, etc)`
 - `q.from(tablename | subquery, alias)`
 - `q.join(tablename | subquery, [alias], on)`
@@ -154,17 +158,57 @@ whereInResult.values // => [ [ 'fancy', 'boring' ] ]
 
 Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
-### To String
+#### Clause order
+
+Clauses are returned in the [correct order](https://github.com/TehShrike/sql-concat/blob/master/constants.js#L19-L35) no matter what order you call the methods in.
 
 ```js
-const toStringResult = q.select('fancy')
+q.from('table').select('column').toString() // `SELECT column\nFROM table``
+```
+
+However, if you call a method multiple times, the values are concatenated in the same order you called them.
+
+```js
+q.from('nifty')
+	.select('snazzy')
+	.select('spiffy')
+	.select('sizzle')
+	.toString() // `SELECT snazzy, spiffy, sizzle\nFROM nifty``
+```
+
+### `q.build()`
+
+Returns an object with these properties:
+
+- `sql`: a string containing the query, with question marks `?` where escaped values should be inserted.
+- `values`: an array of values to be used with the query.
+
+You can pass this object directly to the `query` method of the [`mysql`](https://github.com/mysqljs/mysql#performing-queries) library:
+
+```
+mysql.query(
+	q.select('Cool!').build(),
+	(err, result) => {
+		console.log(result)
+	}
+)
+```
+
+```js
+q.select('column')
+	.where('id', 3)
+	.build() // { sql: `SELECT column\nWHERE id = ?`, values: [ 3 ]}
+```
+
+### `q.toString()`
+
+Returns a string with values escaped by [`sqlstring`](https://github.com/mysqljs/sqlstring#formatting-queries).
+
+```js
+q.select('fancy')
     .from('table')
-    .where('table.pants', [ 'fancy', 'boring' ])
-    .toString()
-
-const queryString = 'SELECT fancy\nFROM table\nWHERE table.pants IN(\'fancy\', \'boring\')'
-
-toStringResult // => queryString
+    .where('table.pants', [ 'what\'s up', 'boring' ])
+    .toString() // => `SELECT fancy\nFROM table\nWHERE table.pants IN('what\\'s up', 'boring')`
 ```
 
 ### Tagged template strings
@@ -203,16 +247,17 @@ functionCallResult.values // => [ 4, 9 ]
 Some syntax for generating nested clauses conditionally would be nice, so you could easily generate something like this dynamically:
 
 ```sql
-WHERE important = ? AND (your_column = ? OR your_column = ?)
+WHERE important = ? AND (your_column = ? OR your_column = ? OR something_else LIKE ?)
 ```
 
 Maybe something like:
 
 ```
-const whereCondition = possibleValues.reduce(
-	(condition, possibleValue) => condition.add('your_column', possibleValue),
-	q.someMagicalOrConditional()
-)
+const whereCondition = q.parenthetical('OR')
+	.equal('your_column', true)
+	.equal('your_column', randomVariable)
+	.like('something_else', anotherVariable)
+
 const query = q.select('everything')
 	.from('table')
 	.where('important', true)
