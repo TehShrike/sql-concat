@@ -121,12 +121,12 @@ If you need a clause added that is not implemented yet, feel free to open a pull
 - `q.from(tablename | subquery, alias)`
 - `q.join(tablename | subquery, [alias], on)`
 - `q.leftJoin(tablename | subquery, [alias], on)`
-- `q.where(expression, [comparitor, [value]])`
-- `q.orWhere(expression, [comparitor, [value]])`
+- `q.where(expression, [comparator, [value]])`
+- `q.orWhere(expression, [comparator, [value]])`
 - `q.whereLike(expression, value)`
 - `q.orWhereLike(expression, value)`
-- `q.having(expression, [comparitor, [value]])`
-- `q.orHaving(expression, [comparitor, [value]])`
+- `q.having(expression, [comparator, [value]])`
+- `q.orHaving(expression, [comparator, [value]])`
 - `q.groupBy(expression1, expression2, etc)`
 - `q.orderBy(expression1, expression2, etc)`
 - `q.limit(offset)`
