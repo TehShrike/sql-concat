@@ -432,15 +432,24 @@ test(`no where value`, t => {
 	const result = q.select(`myColumn`)
 		.from(`table1`)
 		.where(q`MATCH(myColumn) AGAINST(${ input })`)
+		.where(`someOtherColumn = somethingUnrelated`)
 		.build()
 
 	t.equal(result.sql, [
 		`SELECT myColumn`,
 		`FROM table1`,
-		`WHERE MATCH(myColumn) AGAINST(?)`,
+		`WHERE MATCH(myColumn) AGAINST(?) AND someOtherColumn = somethingUnrelated`,
 	].join(`\n`))
 
 	t.deepEqual(result.values, [ `whatever` ])
+
+	t.end()
+})
+
+test(`Throws an error if you call whereLike without a value`, t => {
+	t.throws(() => {
+		q.whereLike(`nuthin`)
+	}, /like/i)
 
 	t.end()
 })
