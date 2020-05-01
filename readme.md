@@ -137,7 +137,7 @@ Every clause method returns a new immutable `q` query object.
 - `q.forUpdate()`
 - `q.lockInShareMode()`
 
-`expression` strings are inserted without being parameterized, but you can also pass in [tagged template strings](https://github.com/TehShrike/sql-concat/tree/tagged-template-support#tagged-template-strings) to do anything special.
+`expression` strings are inserted without being parameterized, but you can also pass in [tagged template strings](#tagged-template-strings) to do anything special.
 
 All `value`s are automatically parameterized.  If a `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`:
 
