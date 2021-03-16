@@ -4,13 +4,24 @@ module.exports = (queryParts, ...values) => {
 			queryObject.str += queryPart
 
 			if (i < values.length) {
-				queryObject.str += `?`
-				queryObject.params.push(values[i])
+				const nextValue = values[i]
+
+				if (nextValue
+					&& typeof nextValue === `object`
+					&& typeof nextValue.sql === `string`
+					&& Array.isArray(nextValue.values)
+				) {
+					queryObject.str += `(${ nextValue.sql })`
+					queryObject.params.push(...nextValue.values)
+				} else {
+					queryObject.str += `?`
+					queryObject.params.push(nextValue)
+				}
 			}
 
 			return queryObject
 		},
-		{ str: ``, params: [] }
+		{ str: ``, params: [] },
 	)
 
 	return Object.assign(query, {
