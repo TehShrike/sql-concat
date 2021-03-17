@@ -3,14 +3,14 @@ const { clauseOrder } = require(`./constants`)
 module.exports = {
 	staticText(text) {
 		return {
-			str: text,
+			sql: text,
 		}
 	},
 	whateverTheyPutIn(clausePartsJoinedBy, partsJoinedBy, ...expressions) {
-		const { str, params } = joinExpressions(expressions, partsJoinedBy)
+		const { sql, values } = joinExpressions(expressions, partsJoinedBy)
 		return {
-			str,
-			params,
+			sql,
+			values,
 			joinedBy: clausePartsJoinedBy,
 		}
 	},
@@ -19,12 +19,12 @@ module.exports = {
 			const result = table.build(`\n\t`)
 
 			return {
-				str: combineWithAlias(`(\n\t${ result.str }\n)`, alias),
-				params: result.params,
+				sql: combineWithAlias(`(\n\t${ result.sql }\n)`, alias),
+				values: result.values,
 			}
 		} else {
 			return {
-				str: combineWithAlias(table, alias),
+				sql: combineWithAlias(table, alias),
 			}
 		}
 	},
@@ -37,27 +37,27 @@ module.exports = {
 			if (opts.like) {
 				throw new Error(`You can't use a "like" comparison without passing in a value`)
 			}
-			return Object.assign({ joinedBy }, expressionObject)
+			return { joinedBy, ...expressionObject }
 		} else if (value === undefined) {
 			value = comparator
 			comparator = undefined
 		}
 
-		const valueIsObject = (value && typeof value === `object` && value.params)
+		const valueIsObject = (value && typeof value === `object` && value.values && typeof value.values === 'object')
 
 		const valueParams = valueIsObject
-			? value.params
+			? value.values
 			: [ value ]
 
-		const params = [ ...expressionObject.params, ...valueParams ]
+		const values = [ ...expressionObject.values, ...valueParams ]
 
 		const comparatorAndValue = valueIsObject
-			? getComparison(opts.like, comparator) + ` ` + value.str
+			? getComparison(opts.like, comparator) + ` ` + value.sql
 			: getComparisonAndParameterString(value, opts.like, comparator)
 
 		return {
-			str: `${ expressionObject.str } ${ comparatorAndValue }`,
-			params,
+			sql: `${ expressionObject.sql } ${ comparatorAndValue }`,
+			values,
 			joinedBy,
 		}
 	},
@@ -75,9 +75,9 @@ module.exports = {
 		let onString = ``
 
 		if (on) {
-			if (on.params) {
-				onParams = on.params
-				onString = makeOn(on.str)
+			if (on.values) {
+				onParams = on.values
+				onString = makeOn(on.sql)
 			} else {
 				onString = makeOn(on)
 			}
@@ -88,14 +88,14 @@ module.exports = {
 			const result = table.build(`\n\t`)
 
 			return {
-				str: joinString() + combineWithAlias(`(\n\t${ result.str }\n)`, alias) + onString,
-				params: [ ...result.params, ...onParams ],
+				sql: joinString() + combineWithAlias(`(\n\t${ result.sql }\n)`, alias) + onString,
+				values: [ ...result.values, ...onParams ],
 				joinedBy: `\n`,
 			}
 		} else {
 			return {
-				str: joinString() + combineWithAlias(table, alias) + onString,
-				params: onParams,
+				sql: joinString() + combineWithAlias(table, alias) + onString,
+				values: onParams,
 				joinedBy: `\n`,
 			}
 		}
@@ -105,32 +105,31 @@ module.exports = {
 const makeOn = on => on ? ` ON ${ on }` : ``
 
 const expressionToObject = expression => {
-	if (expression && typeof expression === `object` && expression.params) {
+	if (expression && typeof expression === `object` && expression.values) {
 		return expression
 	} else {
 		return {
-			str: expression,
-			params: [],
+			sql: expression,
+			values: [],
 		}
 	}
 }
 
 const joinExpressions = (expressions, joinedBy) => {
-	const params = []
-	const strs = []
+	const values = []
+	const sqls = []
 
 	expressions.forEach(expression => {
 		const object = expressionToObject(expression)
-		params.push(...object.params)
-		strs.push(object.str)
+		values.push(...object.values)
+		sqls.push(object.sql)
 	})
 
 	return {
-		str: strs.join(joinedBy),
-		params,
+		sql: sqls.join(joinedBy),
+		values,
 	}
 }
-
 
 const getComparison = (like, comparison) => like ? `LIKE` : (comparison || `=`)
 function getComparisonAndParameterString(value, like, comparison) {

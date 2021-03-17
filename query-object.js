@@ -45,38 +45,38 @@ function build(clauses, joinedBy) {
 		.map(clause => reduceClauseArray(clause.ary, constants.clauseKeyToString[clause.key]))
 		.reduce((part1, part2) => combine(joinedBy, part1, part2))
 
-	return Object.assign(built, {
-		sql: built.str,
-		values: built.params,
-	})
+	return {
+		sql: built.sql,
+		values: built.values,
+	}
 }
 
 function reduceClauseArray(clause, clauseQueryString) {
 	const reducedClause = clause.reduce((splitClause, clausePart) => {
-		if (clausePart.params) {
-			splitClause.params = splitClause.params.concat(clausePart.params)
+		if (clausePart.values) {
+			splitClause.values = splitClause.values.concat(clausePart.values)
 		}
 
-		const joinedBy = (splitClause.str && clausePart.joinedBy) ? clausePart.joinedBy : ` `
+		const joinedBy = (splitClause.sql && clausePart.joinedBy) ? clausePart.joinedBy : ` `
 
-		splitClause.str = (splitClause.str + joinedBy + clausePart.str).trim()
+		splitClause.sql = (splitClause.sql + joinedBy + clausePart.sql).trim()
 
 		return splitClause
 	}, {
-		params: [],
-		str: ``,
+		values: [],
+		sql: ``,
 	})
 
 	return {
-		params: reducedClause.params,
-		str: (`${ clauseQueryString } ${ reducedClause.str }`).trim(),
+		values: reducedClause.values,
+		sql: (`${ clauseQueryString } ${ reducedClause.sql }`).trim(),
 	}
 }
 
 function combine(joinCharacter, part1, part2) {
 	return {
-		params: part1.params.concat(part2.params),
-		str: part1.str + joinCharacter + part2.str,
+		values: part1.values.concat(part2.values),
+		sql: part1.sql + joinCharacter + part2.sql,
 	}
 }
 
