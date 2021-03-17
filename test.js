@@ -302,21 +302,11 @@ test(`Tagged template string`, t => {
 })
 
 test(`Query object in a tagged template string`, t => {
-	const subquery = q.select(`sub`).from(`other`).where(`three`, 3).where('size', q`LPAD(${ 12 }, 2, '0')`).build()
-	const result = q`SELECT wat FROM a WHERE foo = ${ subquery } AND bar IN(${ [ 1, 2 ] })`
-
-	t.equal(result.sql, `SELECT wat FROM a WHERE foo = (SELECT sub\nFROM other\nWHERE three = ? AND size = LPAD(?, 2, '0')) AND bar IN(?)`)
-	t.deepEqual(result.values, [ 3, 12, [ 1, 2 ] ])
-
-	t.end()
-})
-
-test(`Query object in a tagged template string`, t => {
 	const subquery = q.select(`sub`).from(`other`).where(`three`, 3).build()
 	const result = q`SELECT wat FROM a WHERE foo = ${ subquery } AND bar IN(${ [ 1, 2 ] })`
 
-	t.equal(result.str, `SELECT wat FROM a WHERE foo = (SELECT sub\nFROM other\nWHERE three = ?) AND bar IN(?)`)
-	t.deepEqual(result.params, [ 3, [ 1, 2 ] ])
+	t.equal(result.sql, `SELECT wat FROM a WHERE foo = (SELECT sub\nFROM other\nWHERE three = ?) AND bar IN(?)`)
+	t.deepEqual(result.values, [ 3, [ 1, 2 ] ])
 
 	t.end()
 })
