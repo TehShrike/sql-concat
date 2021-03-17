@@ -85,7 +85,7 @@ test(`multiple select values`, t => {
 test(`from clause with alias`, t => {
 	t.equal(
 		q.select(`whatever`).from(`blah`, `a_longer_name_for_no_reason`).build().str,
-		`SELECT whatever\nFROM blah AS a_longer_name_for_no_reason`
+		`SELECT whatever\nFROM blah AS a_longer_name_for_no_reason`,
 	)
 	t.end()
 })
@@ -135,7 +135,7 @@ test(`subqueries`, t => {
 test(`group by`, t => {
 	t.equal(
 		q.groupBy(`a`, `b`).from(`wat`).select(`lol`).where(`butts`, 13).build().str,
-		[ `SELECT lol`, `FROM wat`, `WHERE butts = ?`, `GROUP BY a, b` ].join(`\n`)
+		[ `SELECT lol`, `FROM wat`, `WHERE butts = ?`, `GROUP BY a, b` ].join(`\n`),
 	)
 	t.end()
 })
@@ -302,6 +302,16 @@ test(`Tagged template string`, t => {
 	t.end()
 })
 
+test(`Query object in a tagged template string`, t => {
+	const subquery = q.select(`sub`).from(`other`).where(`three`, 3).build()
+	const result = q`SELECT wat FROM a WHERE foo = ${ subquery } AND bar IN(${ [ 1, 2 ] })`
+
+	t.equal(result.str, `SELECT wat FROM a WHERE foo = (SELECT sub\nFROM other\nWHERE three = ?) AND bar IN(?)`)
+	t.deepEqual(result.params, [ 3, [ 1, 2 ] ])
+
+	t.end()
+})
+
 test(`Passing a str/params object as a value`, t => {
 	const { str, params } = q.select(`howdy`)
 		.from(`meh`)
@@ -342,35 +352,35 @@ test(`Passing str/params into every clause`, t => {
 
 	assertLegit(
 		q.select(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`SELECT FOO(?), BAR(?)`
+		`SELECT FOO(?), BAR(?)`,
 	)
 	assertLegit(
 		q.join(`table`, q`FOO(${ 1 }) = BAR(${ 2 })`),
-		`JOIN table ON FOO(?) = BAR(?)`
+		`JOIN table ON FOO(?) = BAR(?)`,
 	)
 	assertLegit(
 		q.leftJoin(`table`, q`FOO(${ 1 }) = BAR(${ 2 })`),
-		`LEFT JOIN table ON FOO(?) = BAR(?)`
+		`LEFT JOIN table ON FOO(?) = BAR(?)`,
 	)
 	assertLegit(
 		q.where(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`WHERE FOO(?) = BAR(?)`
+		`WHERE FOO(?) = BAR(?)`,
 	)
 	assertLegit(
 		q.whereLike(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`WHERE FOO(?) LIKE BAR(?)`
+		`WHERE FOO(?) LIKE BAR(?)`,
 	)
 	assertLegit(
 		q.having(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`HAVING FOO(?) = BAR(?)`
+		`HAVING FOO(?) = BAR(?)`,
 	)
 	assertLegit(
 		q.groupBy(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`GROUP BY FOO(?), BAR(?)`
+		`GROUP BY FOO(?), BAR(?)`,
 	)
 	assertLegit(
 		q.orderBy(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`ORDER BY FOO(?), BAR(?)`
+		`ORDER BY FOO(?), BAR(?)`,
 	)
 
 	t.end()
