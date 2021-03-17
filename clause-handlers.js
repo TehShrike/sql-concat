@@ -49,7 +49,6 @@ module.exports = {
 			? value.values
 			: [ value ]
 
-		console.log(typeof valueParams, valueParams)
 		const values = [ ...expressionObject.values, ...valueParams ]
 
 		const comparatorAndValue = valueIsObject
