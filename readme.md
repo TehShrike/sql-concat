@@ -2,7 +2,7 @@
 
 A MySQL query builder.
 
-```
+```node
 const q = require('sql-concat')
 ```
 
@@ -22,7 +22,7 @@ The only "breaking" change from 1.x to 2.x is that support for versions of node 
 
 ## Looks like
 
-```
+```node
 const q = require('sql-concat')
 ```
 
@@ -185,7 +185,7 @@ Returns an object with these properties:
 
 You can pass this object directly to the `query` method of the [`mysql`](https://github.com/mysqljs/mysql#performing-queries) library:
 
-```
+```node
 mysql.query(
 	q.select('Cool!').build(),
 	(err, result) => {
@@ -252,7 +252,7 @@ WHERE important = ? AND (your_column = ? OR your_column = ? OR something_else LI
 
 Maybe something like:
 
-```
+```node
 const whereCondition = q.parenthetical('OR')
 	.equal('your_column', true)
 	.equal('your_column', randomVariable)
