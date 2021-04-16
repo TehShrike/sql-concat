@@ -328,6 +328,23 @@ test(`Passing a str/params object as a value`, t => {
 	t.end()
 })
 
+test(`Passing a str/params object in an "on" clause`, t => {
+	const { sql, values } = q.select(`howdy`)
+		.from(`meh`)
+		.where(`a`, 1)
+		.join(`tag`, {
+			sql: `something_cool = FANCY(?, ?)`,
+			values: [ `pants`, `butts` ],
+		})
+		.where(`b`, 2)
+		.build()
+
+	t.equal(sql, `SELECT howdy\nFROM meh\nJOIN tag ON something_cool = FANCY(?, ?)\nWHERE a = ? AND b = ?`)
+	t.deepEqual(values, [ `pants`, `butts`, 1, 2 ])
+
+	t.end()
+})
+
 test(`Integration: passing a tagged template string result as an argument`, t => {
 	const { sql, values } = q.where(`tag`, q`FANCY(${ `pants` }, ${ `butts` })`).build()
 

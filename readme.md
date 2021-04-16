@@ -123,8 +123,8 @@ Every clause method returns a new immutable `q` query object.
 
 - `q.select(expression1, expression2, etc)`
 - `q.from(tablename | subquery, alias)`
-- `q.join(tablename | subquery, [alias], on)`
-- `q.leftJoin(tablename | subquery, [alias], on)`
+- `q.join(tablename | subquery, [alias], on_expression)`
+- `q.leftJoin(tablename | subquery, [alias], on_expression)`
 - `q.where(expression, [comparator, [value]])`
 - `q.orWhere(expression, [comparator, [value]])`
 - `q.whereLike(expression, value)`
