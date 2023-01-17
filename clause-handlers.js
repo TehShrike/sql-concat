@@ -15,7 +15,7 @@ module.exports = {
 		}
 	},
 	tableNameOrSubquery(table, alias) {
-		if (isAQuery(table)) {
+		if (hasABuildFunction(table)) {
 			const result = table.build(`\n\t`)
 
 			return {
@@ -84,7 +84,7 @@ module.exports = {
 		}
 
 
-		if (isAQuery(table)) {
+		if (hasABuildFunction(table)) {
 			const result = table.build(`\n\t`)
 
 			return {
@@ -142,10 +142,8 @@ function getComparisonAndParameterString(value, like, comparison) {
 	}
 }
 
-function isAQuery(q) {
-	const clauses = q && typeof q.getClauses === `function` && q.getClauses()
-
-	return clauses && clauseOrder.every(clauseName => clauses[clauseName])
+function hasABuildFunction(q) {
+	return typeof q.build === `function`
 }
 
 function combineWithAlias(str, alias) {
