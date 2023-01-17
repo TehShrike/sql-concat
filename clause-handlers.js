@@ -1,5 +1,3 @@
-const { clauseOrder } = require(`./constants`)
-
 module.exports = {
 	staticText(text) {
 		return {
