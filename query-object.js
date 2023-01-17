@@ -5,62 +5,9 @@ const {
 	columnParam,
 	staticText,
 } = require(`./clause-handlers`)
-const constants = require(`./constants`)
 const sqlString = require(`sqlstring`)
-
-const combinableType = {
-	text: `text`,
-	clauses: `clauses`,
-}
-
-const buildCombinable = (combinableArray, joinedBy = `\n`) => combinableArray.map(({ type, clauses, text }) => {
-	if (type === combinableType.text) {
-		return { sql: text, values: [] }
-	} else if (type === combinableType.clauses) {
-		return build(clauses, joinedBy)
-	}
-
-	throw new Error(`TehShrike messed up and somehow referenced a combinable type that isn't supported: "${type}"`)
-}).reduce((combined, { sql, values }) => {
-	if (combined) {
-		return {
-			sql: combined.sql + joinedBy + sql,
-			values: [
-				...combined.values,
-				...values,
-			],
-		}
-	} else {
-		return {
-			sql,
-			values,
-		}
-	}
-}, null)
-
-const makeCombinableQueries = combinableArray => ({
-	union: ({ getClauses }) => makeCombinableQueries([
-		...combinableArray,
-		{ text: `UNION`, type: combinableType.text },
-		{ clauses: getClauses(), type: combinableType.clauses },
-	]),
-	unionAll: ({ getClauses }) => makeCombinableQueries([
-		...combinableArray,
-		{ text: `UNION ALL`, type: combinableType.text },
-		{ clauses: getClauses(), type: combinableType.clauses },
-	]),
-	build: joinedBy => buildCombinable(combinableArray, joinedBy),
-	toString: joinedBy => {
-		const { sql, values } = buildCombinable(combinableArray, joinedBy)
-		return sqlString.format(sql, values)
-	},
-})
-
-const combineClauses = (clausesA, combineText, clausesB) => makeCombinableQueries([
-	{ clauses: clausesA, type: combinableType.clauses },
-	{ text: combineText, type: combinableType.text },
-	{ clauses: clausesB, type: combinableType.clauses },
-])
+const { combineClauses } = require(`./combinable-logic.js`)
+const { build } = require(`./build-logic.js`)
 
 const q = clauses => ({
 	select: addToClause(clauses, `select`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
@@ -87,52 +34,6 @@ const q = clauses => ({
 	union: query => combineClauses(clauses, `UNION`, query.getClauses()),
 	unionAll: query => combineClauses(clauses, `UNION ALL`, query.getClauses()),
 })
-
-function build(clauses, joinedBy = `\n`) {
-	const built = constants.clauseOrder.map(
-		key => ({
-			key,
-			ary: clauses[key],
-		}),
-	)
-		.filter(clause => clause.ary && clause.ary.length > 0)
-		.map(clause => reduceClauseArray(clause.ary, constants.clauseKeyToString[clause.key]))
-		.reduce((part1, part2) => combine(joinedBy, part1, part2))
-
-	return {
-		sql: built.sql,
-		values: built.values,
-	}
-}
-
-function reduceClauseArray(clause, clauseQueryString) {
-	const reducedClause = clause.reduce((combinedClause, clausePart) => {
-		if (clausePart.values) {
-			combinedClause.values = combinedClause.values.concat(clausePart.values)
-		}
-
-		const joinedBy = (combinedClause.sql && clausePart.joinedBy) ? clausePart.joinedBy : ` `
-
-		combinedClause.sql = (combinedClause.sql + joinedBy + clausePart.sql).trim()
-
-		return combinedClause
-	}, {
-		values: [],
-		sql: ``,
-	})
-
-	return {
-		values: reducedClause.values,
-		sql: (`${ clauseQueryString } ${ reducedClause.sql }`).trim(),
-	}
-}
-
-function combine(joinCharacter, part1, part2) {
-	return {
-		values: part1.values.concat(part2.values),
-		sql: part1.sql + joinCharacter + part2.sql,
-	}
-}
 
 function addToClause(clauses, key, stringBuilder) {
 	return (...args) => {
