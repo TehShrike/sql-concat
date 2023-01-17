@@ -43,7 +43,7 @@ module.exports = {
 			comparator = undefined
 		}
 
-		const valueIsObject = (value && typeof value === `object` && value.values && typeof value.values === 'object')
+		const valueIsObject = (value && typeof value === `object` && value.values && typeof value.values === `object`)
 
 		const valueParams = valueIsObject
 			? value.values
