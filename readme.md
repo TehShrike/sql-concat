@@ -178,7 +178,7 @@ q.from('nifty')
 
 ### `q.union(query)` and `q.unionAll(query)`
 
-The `union` and `unionAll` methods return a query object that only contains `union` and `unionAll` queries – once you start unioning queries together, you can keep unioning more queries, but you can't add any other clauses to them.
+The `union` and `unionAll` methods return a query object that only contains `union` and `unionAll` methods – once you start unioning queries together, you can keep unioning more queries, but you can't add any other clauses to them.
 
 ### `q.build()`
 
