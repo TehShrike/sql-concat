@@ -1,3 +1,7 @@
+# 3.1.0
+
+- feature: add `union` and `unionAll` methods (#28)[https://github.com/TehShrike/sql-concat/pull/28]
+
 # 3.0.0
 
 - breaking: drop `str` and `params` properties from the built object #26
