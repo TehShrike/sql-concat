@@ -497,3 +497,87 @@ test(`toString custom separator`, t => {
 
 	t.end()
 })
+
+test(`union + unionAll`, t => {
+	const query = q.select(`myColumn`)
+		.from(`table1`)
+		.where(`foo`, `!=`, `baz`)
+		.union(q.select(`wat`).from(`bar`).where(`biz`, true))
+		.unionAll(q.select(`huh`).from(`baz`).having(`wat`, `whatever`))
+
+	const buildResult = query.build()
+
+	t.equal(buildResult.sql, `SELECT myColumn
+FROM table1
+WHERE foo != ?
+UNION
+SELECT wat
+FROM bar
+WHERE biz = ?
+UNION ALL
+SELECT huh
+FROM baz
+HAVING wat = ?`)
+
+	t.deepEqual(buildResult.values, [ `baz`, true, `whatever` ])
+
+	t.equal(query.toString(), `SELECT myColumn
+FROM table1
+WHERE foo != 'baz'
+UNION
+SELECT wat
+FROM bar
+WHERE biz = true
+UNION ALL
+SELECT huh
+FROM baz
+HAVING wat = 'whatever'`)
+
+	t.equal(query.toString(`\n\n`), `SELECT myColumn
+
+FROM table1
+
+WHERE foo != 'baz'
+
+UNION
+
+SELECT wat
+
+FROM bar
+
+WHERE biz = true
+
+UNION ALL
+
+SELECT huh
+
+FROM baz
+
+HAVING wat = 'whatever'`)
+
+	t.end()
+})
+
+test(`union query as subquery`, t => {
+	const subquery = q.select(`1 AS wat`)
+		.from(`table1`)
+		.where(`foo`, false)
+		.unionAll(q.select(`2`).from(`bar`).where(`biz`, true))
+
+	const buildResult = q.select(`wat`).from(subquery, `meh`).build()
+
+	t.equal(buildResult.sql, `SELECT wat
+FROM (
+	SELECT 1 AS wat
+	FROM table1
+	WHERE foo = ?
+	UNION ALL
+	SELECT 2
+	FROM bar
+	WHERE biz = ?
+) AS meh`)
+
+	t.deepEqual(buildResult.values, [ false, true ])
+
+	t.end()
+})

@@ -5,8 +5,9 @@ const {
 	columnParam,
 	staticText,
 } = require(`./clause-handlers`)
-const constants = require(`./constants`)
-const sqlString = require('sqlstring')
+const sqlString = require(`sqlstring`)
+const { combineClauses } = require(`./combinable-logic.js`)
+const { build } = require(`./build-logic.js`)
 
 const q = clauses => ({
 	select: addToClause(clauses, `select`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
@@ -30,55 +31,9 @@ const q = clauses => ({
 		const { sql, values } = build(clauses, joinedBy)
 		return sqlString.format(sql, values)
 	},
+	union: query => combineClauses(clauses, `UNION`, query.getClauses()),
+	unionAll: query => combineClauses(clauses, `UNION ALL`, query.getClauses()),
 })
-
-function build(clauses, joinedBy) {
-	joinedBy = typeof joinedBy === `string` ? joinedBy : `\n`
-
-	const built = constants.clauseOrder.map(
-		key => ({
-			key,
-			ary: clauses[key],
-		})
-	)
-		.filter(clause => clause.ary && clause.ary.length > 0)
-		.map(clause => reduceClauseArray(clause.ary, constants.clauseKeyToString[clause.key]))
-		.reduce((part1, part2) => combine(joinedBy, part1, part2))
-
-	return {
-		sql: built.sql,
-		values: built.values,
-	}
-}
-
-function reduceClauseArray(clause, clauseQueryString) {
-	const reducedClause = clause.reduce((splitClause, clausePart) => {
-		if (clausePart.values) {
-			splitClause.values = splitClause.values.concat(clausePart.values)
-		}
-
-		const joinedBy = (splitClause.sql && clausePart.joinedBy) ? clausePart.joinedBy : ` `
-
-		splitClause.sql = (splitClause.sql + joinedBy + clausePart.sql).trim()
-
-		return splitClause
-	}, {
-		values: [],
-		sql: ``,
-	})
-
-	return {
-		values: reducedClause.values,
-		sql: (`${ clauseQueryString } ${ reducedClause.sql }`).trim(),
-	}
-}
-
-function combine(joinCharacter, part1, part2) {
-	return {
-		values: part1.values.concat(part2.values),
-		sql: part1.sql + joinCharacter + part2.sql,
-	}
-}
 
 function addToClause(clauses, key, stringBuilder) {
 	return (...args) => {

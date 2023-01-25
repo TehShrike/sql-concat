@@ -1,5 +1,3 @@
-const { clauseOrder } = require(`./constants`)
-
 module.exports = {
 	staticText(text) {
 		return {
@@ -15,7 +13,7 @@ module.exports = {
 		}
 	},
 	tableNameOrSubquery(table, alias) {
-		if (isAQuery(table)) {
+		if (hasABuildFunction(table)) {
 			const result = table.build(`\n\t`)
 
 			return {
@@ -43,7 +41,7 @@ module.exports = {
 			comparator = undefined
 		}
 
-		const valueIsObject = (value && typeof value === `object` && value.values && typeof value.values === 'object')
+		const valueIsObject = (value && typeof value === `object` && value.values && typeof value.values === `object`)
 
 		const valueParams = valueIsObject
 			? value.values
@@ -84,7 +82,7 @@ module.exports = {
 		}
 
 
-		if (isAQuery(table)) {
+		if (hasABuildFunction(table)) {
 			const result = table.build(`\n\t`)
 
 			return {
@@ -142,10 +140,8 @@ function getComparisonAndParameterString(value, like, comparison) {
 	}
 }
 
-function isAQuery(q) {
-	const clauses = q && typeof q.getClauses === `function` && q.getClauses()
-
-	return clauses && clauseOrder.every(clauseName => clauses[clauseName])
+function hasABuildFunction(q) {
+	return typeof q.build === `function`
 }
 
 function combineWithAlias(str, alias) {
