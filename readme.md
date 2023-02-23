@@ -125,12 +125,12 @@ Every clause method returns a new immutable `q` query object.
 - `q.from(tablename | subquery, alias)`
 - `q.join(tablename | subquery, [alias], on_expression)`
 - `q.leftJoin(tablename | subquery, [alias], on_expression)`
-- `q.where(expression, [comparator, [value]])`
-- `q.orWhere(expression, [comparator, [value]])`
+- `q.where(expression, [[comparator], value])`
+- `q.orWhere(expression, [[comparator], value])`
 - `q.whereLike(expression, value)`
 - `q.orWhereLike(expression, value)`
-- `q.having(expression, [comparator, [value]])`
-- `q.orHaving(expression, [comparator, [value]])`
+- `q.having(expression, [[comparator], value])`
+- `q.orHaving(expression, [[comparator], value])`
 - `q.groupBy(expression1, expression2, etc)`
 - `q.orderBy(expression1, expression2, etc)`
 - `q.limit(offset)`
@@ -139,7 +139,7 @@ Every clause method returns a new immutable `q` query object.
 
 `expression` strings are inserted without being parameterized, but you can also pass in [tagged template strings](#tagged-template-strings) to do anything special.
 
-All `value`s are automatically parameterized.  If a `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`:
+If a `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`.  Otherwise, it will be compared with `=`.
 
 ```js
 const whereInResult = q.select('fancy')
@@ -156,7 +156,7 @@ whereInResult.sql // => whereInQuery
 whereInResult.values // => [ [ 'fancy', 'boring' ] ]
 ```
 
-Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
+All `value`s are automatically parameterized.  Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
 #### Clause order
 
