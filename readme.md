@@ -139,7 +139,7 @@ Every clause method returns a new immutable `q` query object.
 
 `expression` strings are inserted without being parameterized, but you can also pass in [tagged template strings](#tagged-template-strings) to do anything special.
 
-If a `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`.  Otherwise, it will be compared with `=`.
+All `value`s will be automatically escaped.  If a `value` is `NULL` it will be automatically compared with `IS`, and if it's an array it will be automatically compared with `IN()`.  Otherwise, it will be compared with `=`.
 
 ```js
 const whereInResult = q.select('fancy')
