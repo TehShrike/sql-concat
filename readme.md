@@ -156,7 +156,7 @@ whereInResult.sql // => whereInQuery
 whereInResult.values // => [ [ 'fancy', 'boring' ] ]
 ```
 
-All `value`s are automatically parameterized.  Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
+Put another way, calling `q.select('column1, column2')` is just as acceptable as calling `q.select('column1', 'column2')` and you should use whichever you prefer.
 
 #### Clause order
 
