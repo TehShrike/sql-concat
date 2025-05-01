@@ -1,583 +1,525 @@
-const test = require(`tape`)
-const q = require(`./index`)
+import { test } from 'node:test'
+import assert from 'node:assert'
+import q from './index.js'
 
-test(`first query`, t => {
-	q.select(`WRONG`)
+test('first query', () => {
+	q.select('WRONG')
 
-	const result = q.select(`butt`)
-		.from(`pants`)
+	const result = q.select('butt')
+		.from('pants')
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT butt`,
-		`FROM pants`,
-	].join(`\n`))
-
-	t.end()
+	assert.equal(result.sql, [
+		'SELECT butt',
+		'FROM pants',
+	].join('\n'))
 })
 
-test(`select/from/where with params`, t => {
-	const result = q.select(`butt`)
-		.from(`pants`)
-		.where(`touching`, true)
-		.where(`hugging`, true)
-		.where(`feeling`, false)
+test('select/from/where with params', () => {
+	const result = q.select('butt')
+		.from('pants')
+		.where('touching', true)
+		.where('hugging', true)
+		.where('feeling', false)
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT butt`,
-		`FROM pants`,
-		`WHERE touching = ? AND hugging = ? AND feeling = ?`,
-	].join(`\n`))
-	t.deepEqual(result.values, [ true, true, false ])
+	assert.equal(result.sql, [
+		'SELECT butt',
+		'FROM pants',
+		'WHERE touching = ? AND hugging = ? AND feeling = ?',
+	].join('\n'))
+	assert.deepEqual(result.values, [ true, true, false ])
 
-	t.equal(result.sql, [
-		`SELECT butt`,
-		`FROM pants`,
-		`WHERE touching = ? AND hugging = ? AND feeling = ?`,
-	].join(`\n`))
-	t.deepEqual(result.values, [ true, true, false ])
-
-	t.end()
+	assert.equal(result.sql, [
+		'SELECT butt',
+		'FROM pants',
+		'WHERE touching = ? AND hugging = ? AND feeling = ?',
+	].join('\n'))
+	assert.deepEqual(result.values, [ true, true, false ])
 })
 
-test(`some joins`, t => {
-	const result = q.select(`wat`)
-		.from(`meh`)
-		.join(`no_in_fact_u`, `no_in_fact_u.meh_id = meh.id`)
-		.leftJoin(`who`, `who.no_in_fact_u_id = no_in_fact_u.id`)
+test('some joins', () => {
+	const result = q.select('wat')
+		.from('meh')
+		.join('no_in_fact_u', 'no_in_fact_u.meh_id = meh.id')
+		.leftJoin('who', 'who.no_in_fact_u_id = no_in_fact_u.id')
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT wat`,
-		`FROM meh`,
-		`JOIN no_in_fact_u ON no_in_fact_u.meh_id = meh.id`,
-		`LEFT JOIN who ON who.no_in_fact_u_id = no_in_fact_u.id`,
-	].join(`\n`))
-
-	t.end()
+	assert.equal(result.sql, [
+		'SELECT wat',
+		'FROM meh',
+		'JOIN no_in_fact_u ON no_in_fact_u.meh_id = meh.id',
+		'LEFT JOIN who ON who.no_in_fact_u_id = no_in_fact_u.id',
+	].join('\n'))
 })
 
-test(`WHERE a OR b`, t => {
-	const result = q.select(`wat`)
-		.from(`whatever`)
-		.where(`a`, 1)
-		.orWhere(`b`, 2)
-		.orWhere(`c`, [ 3, 4 ])
+test('WHERE a OR b', () => {
+	const result = q.select('wat')
+		.from('whatever')
+		.where('a', 1)
+		.orWhere('b', 2)
+		.orWhere('c', [ 3, 4 ])
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT wat`,
-		`FROM whatever`,
-		`WHERE a = ? OR b = ? OR c IN(?)`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT wat',
+		'FROM whatever',
+		'WHERE a = ? OR b = ? OR c IN(?)',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ 1, 2, [ 3, 4 ] ])
-	t.end()
+	assert.deepEqual(result.values, [ 1, 2, [ 3, 4 ] ])
 })
 
-test(`multiple select values`, t => {
-	t.equal(q.select(`a`, `b`, `c`).from(`blah`).build().sql, `SELECT a, b, c\nFROM blah`)
-	t.end()
+test('multiple select values', () => {
+	assert.equal(q.select('a', 'b', 'c').from('blah').build().sql, 'SELECT a, b, c\nFROM blah')
 })
 
-test(`from clause with alias`, t => {
-	t.equal(
-		q.select(`whatever`).from(`blah`, `a_longer_name_for_no_reason`).build().sql,
-		`SELECT whatever\nFROM blah AS a_longer_name_for_no_reason`,
+test('from clause with alias', () => {
+	assert.equal(
+		q.select('whatever').from('blah', 'a_longer_name_for_no_reason').build().sql,
+		'SELECT whatever\nFROM blah AS a_longer_name_for_no_reason',
 	)
-	t.end()
 })
 
-test(`subqueries`, t => {
-	const subquery = q.select(`thing`).from(`place`).where(`column`, `value`)
+test('subqueries', () => {
+	const subquery = q.select('thing').from('place').where('column', 'value')
 
-	let result = q.select(`a`)
-		.from(subquery, `subquery_alias`)
-		.having(`subquery_alias.thing`, 2)
-		.where(`subquery_alias.thing`, 1)
+	let result = q.select('a')
+		.from(subquery, 'subquery_alias')
+		.having('subquery_alias.thing', 2)
+		.where('subquery_alias.thing', 1)
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT a`,
-		`FROM (`,
-		`\tSELECT thing`,
-		`\tFROM place`,
-		`\tWHERE column = ?`,
-		`) AS subquery_alias`,
-		`WHERE subquery_alias.thing = ?`,
-		`HAVING subquery_alias.thing = ?`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT a',
+		'FROM (',
+		'\tSELECT thing',
+		'\tFROM place',
+		'\tWHERE column = ?',
+		') AS subquery_alias',
+		'WHERE subquery_alias.thing = ?',
+		'HAVING subquery_alias.thing = ?',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ `value`, 1, 2 ])
+	assert.deepEqual(result.values, [ 'value', 1, 2 ])
 
-	result = q.select(`dumb_column`)
-		.from(`dumb_table`, `dumb_alias`)
-		.leftJoin(subquery, `dumb_subquery`, `dumb_subquery.column = dumb_alias.column`)
+	result = q.select('dumb_column')
+		.from('dumb_table', 'dumb_alias')
+		.leftJoin(subquery, 'dumb_subquery', 'dumb_subquery.column = dumb_alias.column')
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT dumb_column`,
-		`FROM dumb_table AS dumb_alias`,
-		`LEFT JOIN (`,
-		`\tSELECT thing`,
-		`\tFROM place`,
-		`\tWHERE column = ?`,
-		`) AS dumb_subquery ON dumb_subquery.column = dumb_alias.column`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT dumb_column',
+		'FROM dumb_table AS dumb_alias',
+		'LEFT JOIN (',
+		'\tSELECT thing',
+		'\tFROM place',
+		'\tWHERE column = ?',
+		') AS dumb_subquery ON dumb_subquery.column = dumb_alias.column',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ `value` ])
-
-	t.end()
+	assert.deepEqual(result.values, [ 'value' ])
 })
 
-test(`group by`, t => {
-	t.equal(
-		q.groupBy(`a`, `b`).from(`wat`).select(`lol`).where(`butts`, 13).build().sql,
-		[ `SELECT lol`, `FROM wat`, `WHERE butts = ?`, `GROUP BY a, b` ].join(`\n`),
+test('group by', () => {
+	assert.equal(
+		q.groupBy('a', 'b').from('wat').select('lol').where('butts', 13).build().sql,
+		[ 'SELECT lol', 'FROM wat', 'WHERE butts = ?', 'GROUP BY a, b' ].join('\n'),
 	)
-	t.end()
 })
 
-test(`where like`, t => {
-	const result = q.select(`lol`).from(`butt`).whereLike(`column`, `starts with%`).build()
-	t.equal(result.sql, [ `SELECT lol`, `FROM butt`, `WHERE column LIKE ?` ].join(`\n`))
-	t.deepEqual(result.values, [ `starts with%` ])
+test('where like', () => {
+	const result = q.select('lol').from('butt').whereLike('column', 'starts with%').build()
+	assert.equal(result.sql, [ 'SELECT lol', 'FROM butt', 'WHERE column LIKE ?' ].join('\n'))
+	assert.deepEqual(result.values, [ 'starts with%' ])
 
-	const result2 = q.select(`lol`).from(`butt`).whereLike(`column`, `starts with%`).orWhereLike(`other_column`, `%ends with`).build()
-	t.equal(result2.sql, [ `SELECT lol`, `FROM butt`, `WHERE column LIKE ? OR other_column LIKE ?` ].join(`\n`))
-	t.deepEqual(result2.values, [ `starts with%`, `%ends with` ])
-
-	t.end()
+	const result2 = q.select('lol').from('butt').whereLike('column', 'starts with%').orWhereLike('other_column', '%ends with').build()
+	assert.equal(result2.sql, [ 'SELECT lol', 'FROM butt', 'WHERE column LIKE ? OR other_column LIKE ?' ].join('\n'))
+	assert.deepEqual(result2.values, [ 'starts with%', '%ends with' ])
 })
 
-test(`order by`, t => {
-	const result = q.select(`lol`).from(`butt`).orderBy(`column1`, `column2`).build()
-	t.equal(result.sql, [ `SELECT lol`, `FROM butt`, `ORDER BY column1, column2` ].join(`\n`))
-	t.deepEqual(result.values, [ ])
-
-	t.end()
+test('order by', () => {
+	const result = q.select('lol').from('butt').orderBy('column1', 'column2').build()
+	assert.equal(result.sql, [ 'SELECT lol', 'FROM butt', 'ORDER BY column1, column2' ].join('\n'))
+	assert.deepEqual(result.values, [ ])
 })
 
-test(`limit`, t => {
-	const result = q.select(`lol`).from(`butt`).limit(10).build()
-	t.equal(result.sql, [ `SELECT lol`, `FROM butt`, `LIMIT 10` ].join(`\n`))
-	t.deepEqual(result.values, [ ])
-
-	t.end()
+test('limit', () => {
+	const result = q.select('lol').from('butt').limit(10).build()
+	assert.equal(result.sql, [ 'SELECT lol', 'FROM butt', 'LIMIT 10' ].join('\n'))
+	assert.deepEqual(result.values, [ ])
 })
 
-test(`null in a where clause`, t => {
-	const result = q.select(`whatever`).from(`meh`).where(`something`, null).where(`thingy`, `whatevs`).build()
-
-	t.equal(result.sql, [ `SELECT whatever`, `FROM meh`, `WHERE something IS ? AND thingy = ?` ].join(`\n`))
-	t.deepEqual(result.values, [ null, `whatevs` ])
-
-	t.end()
+test('limit+row count', () => {
+	const result = q.select('lol').from('butt').limit(10, 15).build()
+	assert.equal(result.sql, [ 'SELECT lol', 'FROM butt', 'LIMIT 10, 15' ].join('\n'))
+	assert.deepEqual(result.values, [ ])
 })
 
-test(`null in a where clause with comparator`, t => {
-	const result = q.select(`whatever`).from(`meh`).where(`something`, `IS NOT`, null).where(`thingy`, `whatevs`).build()
+test('null in a where clause', () => {
+	const result = q.select('whatever').from('meh').where('something', null).where('thingy', 'whatevs').build()
 
-	t.equal(result.sql, [ `SELECT whatever`, `FROM meh`, `WHERE something IS NOT ? AND thingy = ?` ].join(`\n`))
-	t.deepEqual(result.values, [ null, `whatevs` ])
-
-	t.end()
+	assert.equal(result.sql, [ 'SELECT whatever', 'FROM meh', 'WHERE something IS ? AND thingy = ?' ].join('\n'))
+	assert.deepEqual(result.values, [ null, 'whatevs' ])
 })
 
-test(`where in(array)`, t => {
-	const result = q.select(`whatever`).from(`meh`).where(`something`, [ 1, 2, 3 ]).build()
+test('null in a where clause with comparator', () => {
+	const result = q.select('whatever').from('meh').where('something', 'IS NOT', null).where('thingy', 'whatevs').build()
 
-	t.equal(result.sql, [ `SELECT whatever`, `FROM meh`, `WHERE something IN(?)` ].join(`\n`))
-	t.deepEqual(result.values, [ [ 1, 2, 3 ] ])
-
-	t.end()
+	assert.equal(result.sql, [ 'SELECT whatever', 'FROM meh', 'WHERE something IS NOT ? AND thingy = ?' ].join('\n'))
+	assert.deepEqual(result.values, [ null, 'whatevs' ])
 })
 
-test(`lock in shared mode`, t => {
-	const result = q.select(`whatever`).from(`meh`).where(`something`, 22).lockInShareMode().build()
+test('where in(array)', () => {
+	const result = q.select('whatever').from('meh').where('something', [ 1, 2, 3 ]).build()
 
-	t.equal(result.sql, [ `SELECT whatever`, `FROM meh`, `WHERE something = ?`, `LOCK IN SHARE MODE` ].join(`\n`))
-	t.deepEqual(result.values, [ 22 ])
-
-	t.end()
+	assert.equal(result.sql, [ 'SELECT whatever', 'FROM meh', 'WHERE something IN(?)' ].join('\n'))
+	assert.deepEqual(result.values, [ [ 1, 2, 3 ] ])
 })
 
-test(`select for update`, t => {
-	const result = q.select(`whatever`).from(`meh`).where(`something`, 22).forUpdate().build()
+test('lock in shared mode', () => {
+	const result = q.select('whatever').from('meh').where('something', 22).lockInShareMode().build()
 
-	t.equal(result.sql, [ `SELECT whatever`, `FROM meh`, `WHERE something = ?`, `FOR UPDATE` ].join(`\n`))
-	t.deepEqual(result.values, [ 22 ])
-
-	t.end()
+	assert.equal(result.sql, [ 'SELECT whatever', 'FROM meh', 'WHERE something = ?', 'LOCK IN SHARE MODE' ].join('\n'))
+	assert.deepEqual(result.values, [ 22 ])
 })
 
-test(`WHERE gt/lt/gte/lte AND`, t => {
-	const result = q.select(`wat`)
-		.from(`whatever`)
-		.where(`a`, `>`, 1)
-		.where(`b`, `>=`, 2)
-		.where(`c`, `<`, 3)
-		.where(`d`, `<=`, 4)
+test('select for update', () => {
+	const result = q.select('whatever').from('meh').where('something', 22).forUpdate().build()
+
+	assert.equal(result.sql, [ 'SELECT whatever', 'FROM meh', 'WHERE something = ?', 'FOR UPDATE' ].join('\n'))
+	assert.deepEqual(result.values, [ 22 ])
+})
+
+test('WHERE gt/lt/gte/lte AND', () => {
+	const result = q.select('wat')
+		.from('whatever')
+		.where('a', '>', 1)
+		.where('b', '>=', 2)
+		.where('c', '<', 3)
+		.where('d', '<=', 4)
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT wat`,
-		`FROM whatever`,
-		`WHERE a > ? AND b >= ? AND c < ? AND d <= ?`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT wat',
+		'FROM whatever',
+		'WHERE a > ? AND b >= ? AND c < ? AND d <= ?',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ 1, 2, 3, 4 ])
-
-	t.end()
+	assert.deepEqual(result.values, [ 1, 2, 3, 4 ])
 })
 
-test(`WHERE gt/lt/gte/lte OR`, t => {
-	const result = q.select(`wat`)
-		.from(`whatever`)
-		.orWhere(`a`, `>`, 1)
-		.orWhere(`b`, `>=`, 2)
-		.orWhere(`c`, `<`, 3)
-		.orWhere(`d`, `<=`, 4)
+test('WHERE gt/lt/gte/lte OR', () => {
+	const result = q.select('wat')
+		.from('whatever')
+		.orWhere('a', '>', 1)
+		.orWhere('b', '>=', 2)
+		.orWhere('c', '<', 3)
+		.orWhere('d', '<=', 4)
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT wat`,
-		`FROM whatever`,
-		`WHERE a > ? OR b >= ? OR c < ? OR d <= ?`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT wat',
+		'FROM whatever',
+		'WHERE a > ? OR b >= ? OR c < ? OR d <= ?',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ 1, 2, 3, 4 ])
-
-	t.end()
+	assert.deepEqual(result.values, [ 1, 2, 3, 4 ])
 })
 
-test(`HAVING gt/lt/gte/lte AND`, t => {
-	const result = q.select(`wat`)
-		.from(`whatever`)
-		.having(`a`, `>`, 1)
-		.having(`b`, `>=`, 2)
-		.having(`c`, `<`, 3)
-		.having(`d`, `<=`, 4)
+test('HAVING gt/lt/gte/lte AND', () => {
+	const result = q.select('wat')
+		.from('whatever')
+		.having('a', '>', 1)
+		.having('b', '>=', 2)
+		.having('c', '<', 3)
+		.having('d', '<=', 4)
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT wat`,
-		`FROM whatever`,
-		`HAVING a > ? AND b >= ? AND c < ? AND d <= ?`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT wat',
+		'FROM whatever',
+		'HAVING a > ? AND b >= ? AND c < ? AND d <= ?',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ 1, 2, 3, 4 ])
-
-	t.end()
+	assert.deepEqual(result.values, [ 1, 2, 3, 4 ])
 })
 
-test(`HAVING gt/lt/gte/lte OR`, t => {
-	const result = q.select(`wat`)
-		.from(`whatever`)
-		.orHaving(`a`, `>`, 1)
-		.orHaving(`b`, `>=`, 2)
-		.orHaving(`c`, `<`, 3)
-		.orHaving(`d`, `<=`, 4)
+test('HAVING gt/lt/gte/lte OR', () => {
+	const result = q.select('wat')
+		.from('whatever')
+		.orHaving('a', '>', 1)
+		.orHaving('b', '>=', 2)
+		.orHaving('c', '<', 3)
+		.orHaving('d', '<=', 4)
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT wat`,
-		`FROM whatever`,
-		`HAVING a > ? OR b >= ? OR c < ? OR d <= ?`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT wat',
+		'FROM whatever',
+		'HAVING a > ? OR b >= ? OR c < ? OR d <= ?',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ 1, 2, 3, 4 ])
-
-	t.end()
+	assert.deepEqual(result.values, [ 1, 2, 3, 4 ])
 })
 
-test(`Tagged template string`, t => {
+test('Tagged template string', () => {
 	const result = q`SELECT wat FROM a WHERE foo = ${ 4 } AND bar IN(${ [ 1, 2 ] })`
 
-	t.equal(result.sql, `SELECT wat FROM a WHERE foo = ? AND bar IN(?)`)
-	t.deepEqual(result.values, [ 4, [ 1, 2 ] ])
-
-	t.end()
+	assert.equal(result.sql, 'SELECT wat FROM a WHERE foo = ? AND bar IN(?)')
+	assert.deepEqual(result.values, [ 4, [ 1, 2 ] ])
 })
 
-test(`Query object in a tagged template string`, t => {
-	const subquery = q.select(`sub`).from(`other`).where(`three`, 3).build()
+test('Query object in a tagged template string', () => {
+	const subquery = q.select('sub').from('other').where('three', 3).build()
 	const result = q`SELECT wat FROM a WHERE foo = ${ subquery } AND bar IN(${ [ 1, 2 ] })`
 
-	t.equal(result.sql, `SELECT wat FROM a WHERE foo = (SELECT sub\nFROM other\nWHERE three = ?) AND bar IN(?)`)
-	t.deepEqual(result.values, [ 3, [ 1, 2 ] ])
-
-	t.end()
+	assert.equal(result.sql, 'SELECT wat FROM a WHERE foo = (SELECT sub\nFROM other\nWHERE three = ?) AND bar IN(?)')
+	assert.deepEqual(result.values, [ 3, [ 1, 2 ] ])
 })
 
-test(`Passing a str/params object as a value`, t => {
-	const { sql, values } = q.select(`howdy`)
-		.from(`meh`)
-		.where(`a`, 1)
-		.where(`tag`, {
-			sql: `FANCY(?, ?)`,
-			values: [ `pants`, `butts` ],
+test('Passing a str/params object as a value', () => {
+	const { sql, values } = q.select('howdy')
+		.from('meh')
+		.where('a', 1)
+		.where('tag', {
+			sql: 'FANCY(?, ?)',
+			values: [ 'pants', 'butts' ],
 		})
-		.where(`b`, 2)
+		.where('b', 2)
 		.build()
 
-	t.equal(sql, `SELECT howdy\nFROM meh\nWHERE a = ? AND tag = FANCY(?, ?) AND b = ?`)
-	t.deepEqual(values, [ 1, `pants`, `butts`, 2 ])
-
-	t.end()
+	assert.equal(sql, 'SELECT howdy\nFROM meh\nWHERE a = ? AND tag = FANCY(?, ?) AND b = ?')
+	assert.deepEqual(values, [ 1, 'pants', 'butts', 2 ])
 })
 
-test(`Passing a str/params object in an "on" clause`, t => {
-	const { sql, values } = q.select(`howdy`)
-		.from(`meh`)
-		.where(`a`, 1)
-		.join(`tag`, {
-			sql: `something_cool = FANCY(?, ?)`,
-			values: [ `pants`, `butts` ],
+test('Passing a str/params object in an "on" clause', () => {
+	const { sql, values } = q.select('howdy')
+		.from('meh')
+		.where('a', 1)
+		.join('tag', {
+			sql: 'something_cool = FANCY(?, ?)',
+			values: [ 'pants', 'butts' ],
 		})
-		.where(`b`, 2)
+		.where('b', 2)
 		.build()
 
-	t.equal(sql, `SELECT howdy\nFROM meh\nJOIN tag ON something_cool = FANCY(?, ?)\nWHERE a = ? AND b = ?`)
-	t.deepEqual(values, [ `pants`, `butts`, 1, 2 ])
-
-	t.end()
+	assert.equal(sql, 'SELECT howdy\nFROM meh\nJOIN tag ON something_cool = FANCY(?, ?)\nWHERE a = ? AND b = ?')
+	assert.deepEqual(values, [ 'pants', 'butts', 1, 2 ])
 })
 
-test(`Integration: passing a tagged template string result as an argument`, t => {
-	const { sql, values } = q.where(`tag`, q`FANCY(${ `pants` }, ${ `butts` })`).build()
+test('Integration: passing a tagged template string result as an argument', () => {
+	const { sql, values } = q.where('tag', q`FANCY(${ 'pants' }, ${ 'butts' })`).build()
 
-	t.equal(sql, `WHERE tag = FANCY(?, ?)`)
-	t.deepEqual(values, [ `pants`, `butts` ])
-
-	t.end()
+	assert.equal(sql, 'WHERE tag = FANCY(?, ?)')
+	assert.deepEqual(values, [ 'pants', 'butts' ])
 })
 
-test(`Passing str/params into every clause`, t => {
+test('Passing str/params into every clause', () => {
 	const assertLegit = (query, expectedStr) => {
 		const { sql, values } = query.build()
 
-		t.equal(sql, expectedStr, expectedStr)
-		t.deepEqual(values, [ 1, 2 ])
+		assert.equal(sql, expectedStr, expectedStr)
+		assert.deepEqual(values, [ 1, 2 ])
 	}
 
 	assertLegit(
 		q.select(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`SELECT FOO(?), BAR(?)`,
+		'SELECT FOO(?), BAR(?)',
 	)
 	assertLegit(
-		q.join(`table`, q`FOO(${ 1 }) = BAR(${ 2 })`),
-		`JOIN table ON FOO(?) = BAR(?)`,
+		q.join('table', q`FOO(${ 1 }) = BAR(${ 2 })`),
+		'JOIN table ON FOO(?) = BAR(?)',
 	)
 	assertLegit(
-		q.leftJoin(`table`, q`FOO(${ 1 }) = BAR(${ 2 })`),
-		`LEFT JOIN table ON FOO(?) = BAR(?)`,
+		q.leftJoin('table', q`FOO(${ 1 }) = BAR(${ 2 })`),
+		'LEFT JOIN table ON FOO(?) = BAR(?)',
 	)
 	assertLegit(
 		q.where(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`WHERE FOO(?) = BAR(?)`,
+		'WHERE FOO(?) = BAR(?)',
 	)
 	assertLegit(
 		q.whereLike(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`WHERE FOO(?) LIKE BAR(?)`,
+		'WHERE FOO(?) LIKE BAR(?)',
 	)
 	assertLegit(
 		q.having(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`HAVING FOO(?) = BAR(?)`,
+		'HAVING FOO(?) = BAR(?)',
 	)
 	assertLegit(
 		q.groupBy(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`GROUP BY FOO(?), BAR(?)`,
+		'GROUP BY FOO(?), BAR(?)',
 	)
 	assertLegit(
 		q.orderBy(q`FOO(${ 1 })`, q`BAR(${ 2 })`),
-		`ORDER BY FOO(?), BAR(?)`,
+		'ORDER BY FOO(?), BAR(?)',
 	)
-
-	t.end()
 })
 
-test(`sql/values are legit with mulitple clauses`, t => {
-	const result = q.select(`table1.some_boring_id, table2.something_interesting, mystery_table.surprise`, q`LEAST(table1.whatever, ?) AS whatever`)
-		.from(`table1`)
-		.join(`table2`, `table1.some_boring_id = table2.id`)
-		.leftJoin(`mystery_table`, `mystery_table.twister_reality = table2.probably_null_column`)
-		.where(`table1.pants`, `fancy`)
-		.where(`table1.britches`, `>`, 99)
+test('sql/values are legit with mulitple clauses', () => {
+	const result = q.select('table1.some_boring_id, table2.something_interesting, mystery_table.surprise', q`LEAST(table1.whatever, ?) AS whatever`)
+		.from('table1')
+		.join('table2', 'table1.some_boring_id = table2.id')
+		.leftJoin('mystery_table', 'mystery_table.twister_reality = table2.probably_null_column')
+		.where('table1.pants', 'fancy')
+		.where('table1.britches', '>', 99)
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise, LEAST(table1.whatever, ?) AS whatever`,
-		`FROM table1`,
-		`JOIN table2 ON table1.some_boring_id = table2.id`,
-		`LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column`,
-		`WHERE table1.pants = ? AND table1.britches > ?`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise, LEAST(table1.whatever, ?) AS whatever',
+		'FROM table1',
+		'JOIN table2 ON table1.some_boring_id = table2.id',
+		'LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column',
+		'WHERE table1.pants = ? AND table1.britches > ?',
+	].join('\n'))
 
-	t.equal(result.sql, [
-		`SELECT table1.some_boring_id, table2.something_interesting, mystery_table.surprise, LEAST(table1.whatever, ?) AS whatever`,
-		`FROM table1`,
-		`JOIN table2 ON table1.some_boring_id = table2.id`,
-		`LEFT JOIN mystery_table ON mystery_table.twister_reality = table2.probably_null_column`,
-		`WHERE table1.pants = ? AND table1.britches > ?`,
-	].join(`\n`))
-
-	t.deepEqual(result.values, [ `fancy`, 99 ])
-	t.deepEqual(result.values, [ `fancy`, 99 ])
-
-	t.end()
+	assert.deepEqual(result.values, [ 'fancy', 99 ])
 })
 
-test(`custom comparator`, t => {
-	const input = `whatever`
+test('custom comparator', () => {
+	const input = 'whatever'
 
-	const result = q.select(`myColumn`)
-		.from(`table1`)
-		.where(`MATCH(myColumn)`, ` `, q`AGAINST(${ input })`)
+	const result = q.select('myColumn')
+		.from('table1')
+		.where('MATCH(myColumn)', ' ', q`AGAINST(${ input })`)
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT myColumn`,
-		`FROM table1`,
-		`WHERE MATCH(myColumn)   AGAINST(?)`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT myColumn',
+		'FROM table1',
+		'WHERE MATCH(myColumn)   AGAINST(?)',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ `whatever` ])
-
-	t.end()
+	assert.deepEqual(result.values, [ 'whatever' ])
 })
 
-test(`no where value`, t => {
-	const input = `whatever`
+test('no where value', () => {
+	const input = 'whatever'
 
-	const result = q.select(`myColumn`)
-		.from(`table1`)
+	const result = q.select('myColumn')
+		.from('table1')
 		.where(q`MATCH(myColumn) AGAINST(${ input })`)
-		.where(`someOtherColumn = somethingUnrelated`)
+		.where('someOtherColumn = somethingUnrelated')
 		.build()
 
-	t.equal(result.sql, [
-		`SELECT myColumn`,
-		`FROM table1`,
-		`WHERE MATCH(myColumn) AGAINST(?) AND someOtherColumn = somethingUnrelated`,
-	].join(`\n`))
+	assert.equal(result.sql, [
+		'SELECT myColumn',
+		'FROM table1',
+		'WHERE MATCH(myColumn) AGAINST(?) AND someOtherColumn = somethingUnrelated',
+	].join('\n'))
 
-	t.deepEqual(result.values, [ `whatever` ])
-
-	t.end()
+	assert.deepEqual(result.values, [ 'whatever' ])
 })
 
-test(`Throws an error if you call whereLike without a value`, t => {
-	t.throws(() => {
-		q.whereLike(`nuthin`)
+test('Throws an error if you call whereLike without a value', () => {
+	assert.throws(() => {
+		q.whereLike('nuthin')
 	}, /like/i)
-
-	t.end()
 })
 
-test(`toString`, t => {
-	const result = q.select(`myColumn`)
-		.from(`table1`)
-		.where(`foo`, `!=`, `baz`)
+test('toString', () => {
+	const result = q.select('myColumn')
+		.from('table1')
+		.where('foo', '!=', 'baz')
 		.toString()
 
-	t.equal(result, `SELECT myColumn\nFROM table1\nWHERE foo != 'baz'`)
-
-	t.end()
+	assert.equal(result, 'SELECT myColumn\nFROM table1\nWHERE foo != \'baz\'')
 })
 
-test(`toString custom separator`, t => {
-	const result = q.select(`myColumn`)
-		.from(`table1`)
-		.where(`foo`, `!=`, `baz`)
-		.toString(` `)
+test('toString custom separator', () => {
+	const result = q.select('myColumn')
+		.from('table1')
+		.where('foo', '!=', 'baz')
+		.toString(' ')
 
-	t.equal(result, `SELECT myColumn FROM table1 WHERE foo != 'baz'`)
-
-	t.end()
+	assert.equal(result, 'SELECT myColumn FROM table1 WHERE foo != \'baz\'')
 })
 
-test(`union + unionAll`, t => {
-	const query = q.select(`myColumn`)
-		.from(`table1`)
-		.where(`foo`, `!=`, `baz`)
-		.union(q.select(`wat`).from(`bar`).where(`biz`, true))
-		.unionAll(q.select(`huh`).from(`baz`).having(`wat`, `whatever`))
+test('union + unionAll', () => {
+	const query = q.select('myColumn')
+		.from('table1')
+		.where('foo', '!=', 'baz')
+		.union(q.select('wat').from('bar').where('biz', true))
+		.unionAll(q.select('huh').from('baz').having('wat', 'whatever'))
 
 	const buildResult = query.build()
 
-	t.equal(buildResult.sql, `SELECT myColumn
-FROM table1
-WHERE foo != ?
-UNION
-SELECT wat
-FROM bar
-WHERE biz = ?
-UNION ALL
-SELECT huh
-FROM baz
-HAVING wat = ?`)
+	assert.equal(buildResult.sql, [
+		'SELECT myColumn',
+		'FROM table1',
+		'WHERE foo != ?',
+		'UNION',
+		'SELECT wat',
+		'FROM bar',
+		'WHERE biz = ?',
+		'UNION ALL',
+		'SELECT huh',
+		'FROM baz',
+		'HAVING wat = ?'
+	].join('\n'))
 
-	t.deepEqual(buildResult.values, [ `baz`, true, `whatever` ])
+	assert.deepEqual(buildResult.values, [ 'baz', true, 'whatever' ])
 
-	t.equal(query.toString(), `SELECT myColumn
-FROM table1
-WHERE foo != 'baz'
-UNION
-SELECT wat
-FROM bar
-WHERE biz = true
-UNION ALL
-SELECT huh
-FROM baz
-HAVING wat = 'whatever'`)
+	assert.equal(query.toString(), [
+		'SELECT myColumn',
+		'FROM table1',
+		'WHERE foo != \'baz\'',
+		'UNION',
+		'SELECT wat',
+		'FROM bar',
+		'WHERE biz = true',
+		'UNION ALL',
+		'SELECT huh',
+		'FROM baz',
+		'HAVING wat = \'whatever\''
+	].join('\n'))
 
-	t.equal(query.toString(`\n\n`), `SELECT myColumn
-
-FROM table1
-
-WHERE foo != 'baz'
-
-UNION
-
-SELECT wat
-
-FROM bar
-
-WHERE biz = true
-
-UNION ALL
-
-SELECT huh
-
-FROM baz
-
-HAVING wat = 'whatever'`)
-
-	t.end()
+	assert.equal(query.toString('\n\n'), [
+		'SELECT myColumn',
+		'',
+		'FROM table1',
+		'',
+		'WHERE foo != \'baz\'',
+		'',
+		'UNION',
+		'',
+		'SELECT wat',
+		'',
+		'FROM bar',
+		'',
+		'WHERE biz = true',
+		'',
+		'UNION ALL',
+		'',
+		'SELECT huh',
+		'',
+		'FROM baz',
+		'',
+		'HAVING wat = \'whatever\''
+	].join('\n'))
 })
 
-test(`union query as subquery`, t => {
-	const subquery = q.select(`1 AS wat`)
-		.from(`table1`)
-		.where(`foo`, false)
-		.unionAll(q.select(`2`).from(`bar`).where(`biz`, true))
+test('union query as subquery', () => {
+	const subquery = q.select('1 AS wat')
+		.from('table1')
+		.where('foo', false)
+		.unionAll(q.select('2').from('bar').where('biz', true))
 
-	const buildResult = q.select(`wat`).from(subquery, `meh`).build()
+	const buildResult = q.select('wat').from(subquery, 'meh').build()
 
-	t.equal(buildResult.sql, `SELECT wat
-FROM (
-	SELECT 1 AS wat
-	FROM table1
-	WHERE foo = ?
-	UNION ALL
-	SELECT 2
-	FROM bar
-	WHERE biz = ?
-) AS meh`)
+	assert.equal(buildResult.sql, [
+		'SELECT wat',
+		'FROM (',
+		'\tSELECT 1 AS wat',
+		'\tFROM table1',
+		'\tWHERE foo = ?',
+		'\tUNION ALL',
+		'\tSELECT 2',
+		'\tFROM bar',
+		'\tWHERE biz = ?',
+		') AS meh'
+	].join('\n'))
 
-	t.deepEqual(buildResult.values, [ false, true ])
-
-	t.end()
+	assert.deepEqual(buildResult.values, [ false, true ])
 })

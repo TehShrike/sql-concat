@@ -1,33 +1,28 @@
 {
-  "name": "sql-concat",
-  "version": "3.1.0",
-  "description": "It's just fancy string concatenation",
-  "main": "index.js",
-  "scripts": {
-    "test": "node test.js && echo 'Testing readme examples...' && jsmd readme.md && echo 'All done!'"
-  },
-  "engines": {
-    "node": ">=6"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:TehShrike/sql-concat.git"
-  },
-  "keywords": [
-    "sql",
-    "mysql"
-  ],
-  "author": "TehShrike",
-  "license": "WTFPL",
-  "bugs": {
-    "url": "https://github.com/TehShrike/sql-concat/issues"
-  },
-  "homepage": "https://github.com/TehShrike/sql-concat",
-  "devDependencies": {
-    "jsmd": "1.0.0",
-    "tape": "4.9.1"
-  },
-  "dependencies": {
-    "sqlstring": "^2.3.1"
-  }
+	"name": "sql-concat",
+	"version": "3.1.0",
+	"description": "It's just fancy string concatenation",
+	"type": "module",
+	"main": "index.js",
+	"types": "index.d.ts",
+	"scripts": {
+		"test": "node --test test.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:TehShrike/sql-concat.git"
+	},
+	"keywords": [
+		"sql",
+		"mysql"
+	],
+	"author": "TehShrike",
+	"license": "WTFPL",
+	"bugs": {
+		"url": "https://github.com/TehShrike/sql-concat/issues"
+	},
+	"homepage": "https://github.com/TehShrike/sql-concat",
+	"dependencies": {
+		"sqlstring": "^2.3.1"
+	}
 }

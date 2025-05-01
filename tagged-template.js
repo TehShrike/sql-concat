@@ -1,4 +1,4 @@
-module.exports = (queryParts, ...values) => {
+export default (queryParts, ...values) => {
 	return queryParts.reduce(
 		(queryObject, queryPart, i) => {
 			queryObject.sql += queryPart

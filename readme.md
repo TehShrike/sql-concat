@@ -3,7 +3,7 @@
 A MySQL query builder.
 
 ```node
-const q = require('sql-concat')
+import q from 'sql-concat'
 ```
 
 The only "breaking" change from 1.x to 2.x is that support for versions of node older than 6 was dropped.
@@ -23,11 +23,11 @@ The only "breaking" change from 1.x to 2.x is that support for versions of node 
 ## Looks like
 
 ```node
-const q = require('sql-concat')
+import q from 'sql-concat'
 ```
 
 <!--js
-var q = require('./')
+import q from './index.js'
 -->
 
 ```js
@@ -133,7 +133,7 @@ Every clause method returns a new immutable `q` query object.
 - `q.orHaving(expression, [[comparator], value])`
 - `q.groupBy(expression1, expression2, etc)`
 - `q.orderBy(expression1, expression2, etc)`
-- `q.limit(offset)`
+- `q.limit(offset, [row_count])`
 - `q.forUpdate()`
 - `q.lockInShareMode()`
 

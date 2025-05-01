@@ -1,5 +1,5 @@
-const q = require(`./query-object`)
-const { startingClauses } = require(`./constants`)
-const taggedTemplate = require(`./tagged-template.js`)
+import q from './query-object.js'
+import { startingClauses } from './constants.js'
+import taggedTemplate from './tagged-template.js'
 
-module.exports = Object.assign(taggedTemplate, q(startingClauses))
+export default Object.assign(taggedTemplate, q(startingClauses))

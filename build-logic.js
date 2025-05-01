@@ -1,14 +1,14 @@
-const constants = require(`./constants`)
+import { clauseOrder, clauseKeyToString } from './constants.js'
 
 function build(clauses, joinedBy = `\n`) {
-	const built = constants.clauseOrder.map(
+	const built = clauseOrder.map(
 		key => ({
 			key,
 			ary: clauses[key],
 		}),
 	)
 		.filter(clause => clause.ary && clause.ary.length > 0)
-		.map(clause => reduceClauseArray(clause.ary, constants.clauseKeyToString[clause.key]))
+		.map(clause => reduceClauseArray(clause.ary, clauseKeyToString[clause.key]))
 		.reduce((part1, part2) => combine(joinedBy, part1, part2))
 
 	return {
@@ -46,6 +46,4 @@ function combine(joinCharacter, part1, part2) {
 	}
 }
 
-module.exports = {
-	build,
-}
+export { build }

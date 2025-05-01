@@ -1,3 +1,8 @@
+# 4.0.0
+
+- breaking: convert to ESM
+- feature: add type definition
+
 # 3.1.0
 
 - feature: add `union` and `unionAll` methods [#28](https://github.com/TehShrike/sql-concat/pull/28)

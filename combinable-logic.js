@@ -1,5 +1,5 @@
-const sqlString = require(`sqlstring`)
-const { build } = require(`./build-logic.js`)
+import sqlString from 'sqlstring'
+import { build } from './build-logic.js'
 
 const combinableType = {
 	text: `text`,
@@ -55,6 +55,4 @@ const combineClauses = (clausesA, combineText, clausesB) => makeCombinableQuerie
 	{ clauses: clausesB, type: combinableType.clauses },
 ])
 
-module.exports = {
-	combineClauses,
-}
+export { combineClauses }

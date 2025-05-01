@@ -1,13 +1,13 @@
-const {
+import {
 	whateverTheyPutIn,
 	tableNameOrSubquery,
 	joinClauseHandler,
 	columnParam,
 	staticText,
-} = require(`./clause-handlers`)
-const sqlString = require(`sqlstring`)
-const { combineClauses } = require(`./combinable-logic.js`)
-const { build } = require(`./build-logic.js`)
+} from './clause-handlers.js'
+import sqlString from 'sqlstring'
+import { combineClauses } from './combinable-logic.js'
+import { build } from './build-logic.js'
 
 const q = clauses => ({
 	select: addToClause(clauses, `select`, (...args) => whateverTheyPutIn(`, `, `, `, ...args)),
@@ -43,7 +43,6 @@ function addToClause(clauses, key, stringBuilder) {
 	}
 }
 
-
 function copy(o) {
 	return Object.keys(o).reduce((newObject, key) => {
 		newObject[key] = o[key].slice()
@@ -51,4 +50,4 @@ function copy(o) {
 	}, {})
 }
 
-module.exports = q
+export default q

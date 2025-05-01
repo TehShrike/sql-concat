@@ -52,7 +52,7 @@ const startingClauses = {
 	lock: [],
 }
 
-module.exports = {
+export {
 	clauseOrder,
 	clauseKeyToString,
 	startingClauses,
