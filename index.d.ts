@@ -26,7 +26,7 @@ declare module 'sql-concat' {
 		where(sql_expression: string, value: Value): Query
 		where(sql_expression: string, comparator: string, value: Value): Query
 		orWhere(sql_expression: string): Query
-		orwhere(sql_expression: string, value: Value): Query
+		orWhere(sql_expression: string, value: Value): Query
 		orWhere(sql_expression: string, comparator: string, value: Value): Query
 		whereLike(sql_expression: string, value: Value): Query
 		orWhereLike(sql_expression: string, value: Value): Query

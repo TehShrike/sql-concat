@@ -1,3 +1,7 @@
+# 4.0.1
+
+- fix a typo in the type definition
+
 # 4.0.0
 
 - breaking: convert to ESM
