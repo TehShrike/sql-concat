@@ -1,3 +1,7 @@
+# 4.1.0
+
+- change the type of an object parameter from `object` to `Record<string, any>`
+
 # 4.0.1
 
 - fix a typo in the type definition

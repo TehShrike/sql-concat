@@ -11,7 +11,7 @@ declare module 'sql-concat' {
 		unionAll(query: Buildable): Unionable
 	} & Buildable
 
-	type Value = string | number | null | Record<string, unknown>
+	type Value = string | number | null | Record<string, any>
 
 	type Tag = (sql: TemplateStringsArray, ...values: any[]) => string
 
